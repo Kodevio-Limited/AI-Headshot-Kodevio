@@ -1,74 +1,137 @@
-"use client";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const individualPlans = [
-  { name: "Basic", price: 12, original: 35, headshots: 40, time: "45 mins", attire: "1", bg: "1", resolution: "Standard" },
-  { name: "Standard", price: 15, original: 45, headshots: 60, time: "30 mins", attire: "2", bg: "2", resolution: "Standard", popular: true },
-  { name: "Executive", price: 25, original: 75, headshots: 100, time: "15 mins", attire: "All", bg: "All", resolution: "Enhanced", bestValue: true },
-];
-
-const teamPlans = [
-  { name: "Small Team", price: 10, original: 25, headshots: 40, time: "45 mins", members: "5-10", features: ["Consistent styling", "Basic customization"] },
-  { name: "Business", price: 8, original: 20, headshots: 60, time: "30 mins", members: "11-50", features: ["Consistent styling", "Brand colors", "Priority support"], popular: true },
-  { name: "Enterprise", price: 6, original: 15, headshots: 100, time: "15 mins", members: "51+", features: ["Consistent styling", "Full branding", "API access", "Dedicated support"], bestValue: true },
+const plans = [
+  {
+    name: "Essential",
+    description: "Perfect for trying out",
+    price: 19,
+    features: [
+      "20 AI headshots",
+      "3 professional styles",
+      "Standard resolution",
+      "24-hour delivery",
+    ],
+  },
+  {
+    name: "Professional",
+    description: "Most popular choice",
+    price: 39,
+    featured: true,
+    features: [
+      "50 AI headshots",
+      "10 professional styles",
+      "High resolution downloads",
+      "1-hour express delivery",
+      "Background variations",
+      "Retouching adjustments",
+    ],
+  },
+  {
+    name: "Executive",
+    description: "For maximum impact",
+    price: 79,
+    features: [
+      "100 AI headshots",
+      "Unlimited styles",
+      "4K resolution downloads",
+      "15-minute delivery",
+      "Custom backgrounds",
+      "Advanced retouching",
+      "LinkedIn optimization",
+      "Priority support",
+    ],
+  },
 ];
 
 export default function Pricing() {
-  const [tab, setTab] = useState<"individual" | "team">("individual");
-  const plans = tab === "individual" ? individualPlans : teamPlans;
-  
   return (
-    <section className="bg-gradient-to-b from-gray-900 to-gray-800 py-20 text-white">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="inline-block rounded-full bg-white/10 px-4 py-1 text-sm font-bold">20% off all packages</span>
-          <h2 className="mt-4 text-3xl font-bold text-balance">Professional-grade photoshoots for a <span className="text-orange-400">fraction</span> of the cost</h2>
+    <section id="pricing" className="bg-transparent py-24">
+      <div className="mx-auto max-w-6xl px-6 lg:px-8">
+        {/* Section Header */}
+        <div className="text-center">
+          <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl text-balance">
+            Simple, transparent pricing
+          </h2>
+          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+            Invest in your professional image. No subscriptions, no hidden fees.
+          </p>
         </div>
-        <div className="mt-8 flex justify-center">
-          <div className="inline-flex rounded-full border border-white/20 bg-white/10 p-1">
-            <button onClick={() => setTab("individual")} className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${tab === "individual" ? "bg-white text-black" : "text-gray-300 hover:text-white"}`}>Individual Pricing</button>
-            <button onClick={() => setTab("team")} className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${tab === "team" ? "bg-white text-black" : "text-gray-300 hover:text-white"}`}>Teams Pricing</button>
-          </div>
-        </div>
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
+
+        {/* Pricing Cards */}
+        <div className="mt-16 grid gap-8 lg:grid-cols-3">
           {plans.map((plan) => (
-            <div key={plan.name} className={`rounded-2xl p-6 ${plan.popular ? "bg-white text-black shadow-xl ring-2 ring-orange-500" : "bg-gray-800"}`}>
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold">{plan.name}</h3>
-                {plan.popular && <span className="rounded-full bg-orange-500 px-2 py-0.5 text-xs font-semibold text-white">83% pick this</span>}
-                {plan.bestValue && <span className="rounded-full bg-blue-500 px-2 py-0.5 text-xs font-semibold text-white">Best Value</span>}
+            <div
+              key={plan.name}
+              className={cn(
+                "relative rounded-2xl border p-8 transition-all duration-300",
+                plan.featured
+                  ? "border-accent bg-card shadow-lg ring-1 ring-accent"
+                  : "border-border bg-card hover:border-accent/30 hover:shadow-lg"
+              )}
+            >
+              {/* Featured Badge */}
+              {plan.featured && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <span className="rounded-full bg-accent px-4 py-1.5 text-sm font-medium text-accent-foreground">
+                    Recommended
+                  </span>
+                </div>
+              )}
+
+              {/* Plan Header */}
+              <div className="text-center">
+                <h3 className="text-xl font-semibold text-foreground">
+                  {plan.name}
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {plan.description}
+                </p>
               </div>
-              <div className="mt-4 flex items-baseline gap-2">
-                <span className="text-4xl font-bold">${plan.price}</span>
-                <span className={`line-through ${plan.popular ? "text-gray-400" : "text-gray-500"}`}>${plan.original}</span>
-                {tab === "team" && <span className="text-sm text-gray-400">/person</span>}
+
+              {/* Price */}
+              <div className="mt-6 text-center">
+                <span className="text-5xl font-semibold tracking-tight text-foreground">
+                  ${plan.price}
+                </span>
+                <span className="ml-1 text-muted-foreground">one-time</span>
               </div>
-              <ul className="mt-6 space-y-3">
-                <li className="flex items-center gap-2"><Check className="h-5 w-5 text-orange-500" /> {plan.headshots} headshots</li>
-                <li className="flex items-center gap-2"><Check className="h-5 w-5 text-orange-500" /> {plan.time} generation</li>
-                {tab === "individual" ? (
-                  <>
-                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-orange-500" /> {(plan as typeof individualPlans[0]).attire} attire choice</li>
-                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-orange-500" /> {(plan as typeof individualPlans[0]).bg} background choice</li>
-                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-orange-500" /> {(plan as typeof individualPlans[0]).resolution} resolution</li>
-                  </>
-                ) : (
-                  <>
-                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-orange-500" /> {(plan as typeof teamPlans[0]).members} team members</li>
-                    {(plan as typeof teamPlans[0]).features?.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2"><Check className="h-5 w-5 text-orange-500" /> {feature}</li>
-                    ))}
-                  </>
-                )}
+
+              {/* Features */}
+              <ul className="mt-8 space-y-4">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-start gap-3">
+                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/10">
+                      <Check className="h-3 w-3 text-accent" />
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {feature}
+                    </span>
+                  </li>
+                ))}
               </ul>
-              <Button className={`mt-8 w-full ${plan.popular ? "bg-orange-600 text-white hover:bg-orange-700" : "bg-white text-black hover:bg-gray-100"}`}>
-                Select
+
+              {/* CTA Button */}
+              <Button
+                className={cn(
+                  "mt-8 w-full",
+                  plan.featured
+                    ? "bg-accent text-accent-foreground hover:bg-accent/90 hover:glow-primary"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90"
+                )}
+                size="lg"
+              >
+                Get Started
               </Button>
             </div>
           ))}
         </div>
+
+        {/* Bottom Note */}
+        <p className="mt-12 text-center text-sm text-muted-foreground">
+          All plans include commercial usage rights and are covered by our satisfaction guarantee.
+        </p>
       </div>
     </section>
   );

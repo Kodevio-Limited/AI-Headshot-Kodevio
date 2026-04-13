@@ -1,31 +1,68 @@
+import { Upload, Sparkles, Download } from "lucide-react";
+
 const steps = [
-  { number: 1, title: "Select your attire and backgrounds", desc: "Choose from our selection of curated outfits and backgrounds." },
-  { number: 2, title: "Upload a few photos of yourself", desc: "Selfies work great. Six uploads is all you need - focus on quality over quantity for the best results." },
-  { number: 3, title: "We create a custom AI model just for you", desc: "Our AI model gets to work. Just wait for your results and we&apos;ll email you when your headshots are ready!" },
-  { number: 4, title: "View, edit, and download your favorites!", desc: "You&apos;ll receive up to 100 high-quality headshots to use however you want." },
+  {
+    number: 1,
+    icon: Upload,
+    title: "Upload your photo",
+    desc: "Select any clear photo of yourself. A casual selfie works perfectly.",
+  },
+  {
+    number: 2,
+    icon: Sparkles,
+    title: "AI transforms your image",
+    desc: "Our AI analyzes and enhances your photo with professional studio quality.",
+  },
+  {
+    number: 3,
+    icon: Download,
+    title: "Download your headshots",
+    desc: "Choose from multiple professional styles and download in high resolution.",
+  },
 ];
 
 export default function HowItWorks() {
   return (
-    <section className="py-16">
-      <div className="container mx-auto px-4">
-        <h2 className="text-center text-3xl font-bold text-foreground text-balance">Get your headshots in <span className="text-orange-500">minutes</span>, not days</h2>
-        <p className="mt-2 text-center text-gray-600">{"It's as easy as 1-2-3-4!"}</p>
-        <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {steps.map((step) => (
-            <div key={step.number} className="text-center md:text-left">
-              <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-gradient-to-br from-orange-50 to-orange-100">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-16 w-16 rounded-full bg-orange-200 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-orange-600">{step.number}</span>
-                  </div>
+    <section id="how-it-works" className="bg-transparent py-24">
+      <div className="mx-auto max-w-6xl px-6 lg:px-8">
+        {/* Section Header */}
+        <div className="text-center">
+          <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl text-balance">
+            How it works
+          </h2>
+          <p className="mt-4 text-lg text-muted-foreground">
+            Three simple steps to your professional headshot
+          </p>
+        </div>
+
+        {/* Steps */}
+        <div className="mt-16 grid gap-8 md:grid-cols-3">
+          {steps.map((step, index) => (
+            <div key={step.number} className="relative">
+              {/* Connector Line (hidden on last item and mobile) */}
+              {index < steps.length - 1 && (
+                <div className="absolute left-1/2 top-12 hidden h-px w-full bg-border md:block" />
+              )}
+
+              <div className="relative flex flex-col items-center text-center">
+                {/* Icon Container */}
+                <div className="relative z-10 flex h-24 w-24 items-center justify-center rounded-2xl border border-border bg-card shadow-sm">
+                  <step.icon className="h-10 w-10 text-accent" />
                 </div>
+
+                {/* Step Number */}
+                <div className="mt-6 flex h-8 w-8 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-foreground">
+                  {step.number}
+                </div>
+
+                {/* Content */}
+                <h3 className="mt-4 text-lg font-semibold text-foreground">
+                  {step.title}
+                </h3>
+                <p className="mt-2 text-muted-foreground max-w-xs leading-relaxed">
+                  {step.desc}
+                </p>
               </div>
-              <div className="mt-4 flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-600 text-sm font-bold text-white">{step.number}</div>
-                <h3 className="text-lg font-bold text-foreground">{step.title}</h3>
-              </div>
-              <p className="mt-2 text-gray-600">{step.desc}</p>
             </div>
           ))}
         </div>
