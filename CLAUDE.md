@@ -1,1 +1,1 @@
-@AGENTS.md
+. Let@AGENTS.md
