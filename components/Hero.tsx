@@ -163,7 +163,7 @@ export default function Hero() {
                 <div className="flex items-center gap-3">
                   <div className="relative h-10 w-10 overflow-hidden rounded-full">
                     <Image
-                      src="/assets/comparison/before.jpg"
+                      src="/assets/comparison/Lovelace/before.jpg"
                       alt="Before headshot"
                       fill
                       className="object-cover"
@@ -182,7 +182,7 @@ export default function Hero() {
                 <div className="flex items-center gap-3">
                   <div className="relative h-10 w-10 overflow-hidden rounded-full">
                     <Image
-                      src="/assets/comparison/after.jpg"
+                      src="/assets/comparison/Lovelace/after.png"
                       alt="After headshot"
                       fill
                       className="object-cover"

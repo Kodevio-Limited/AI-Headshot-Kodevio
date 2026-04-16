@@ -6,10 +6,10 @@ import { ArrowRight } from "lucide-react";
 const transformations = [
   {
     id: 1,
-    name: "Sarah Chen",
+    name: "Ada Lovelace",
     role: "Marketing Director",
-    before: "/assets/comparison/before.jpg",
-    after: "/assets/comparison/after.jpg",
+    before: "/assets/comparison/Lovelace/before.jpg",
+    after: "/assets/comparison/Lovelace/after.png",
   },
   {
     id: 2,

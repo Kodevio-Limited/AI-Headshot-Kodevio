@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 
 const beforeAfterPairs = [
-  { before: "/assets/comparison/before.jpg", after: "/assets/comparison/after.jpg" },
+  { before: "/assets/comparison/Lovelace/before.jpg", after: "/assets/comparison/Lovelace/after.png" },
 ];
 
 export default function BeforeAfterSlider() {

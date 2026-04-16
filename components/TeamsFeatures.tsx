@@ -59,7 +59,7 @@ export default function TeamsFeatures() {
               );
             })}
           </div>
-          <div className="relative aspect-video overflow-hidden rounded-2xl bg-gradient-to-br from-orange-100 to-orange-50">
+          <div className="relative aspect-video overflow-hidden rounded-2xl bg-linear-to-br from-orange-100 to-orange-50">
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
                 <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-orange-500 text-white">
