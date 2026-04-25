@@ -1,34 +1,122 @@
+# import cv2
+# import mediapipe as mp
+# from pathlib import Path
+
+
+# class ImageValidator:
+#     def __init__(self, model_asset_path: str):
+#         if not Path(model_asset_path).exists():
+#             raise FileNotFoundError(f"Model not found: {model_asset_path}")
+
+#         BaseOptions = mp.tasks.BaseOptions
+#         FaceDetector = mp.tasks.vision.FaceDetector
+#         FaceDetectorOptions = mp.tasks.vision.FaceDetectorOptions
+
+#         options = FaceDetectorOptions(
+#             base_options=BaseOptions(model_asset_path=model_asset_path),
+#             min_detection_confidence=0.6  # stable default
+#         )
+
+#         self.detector = FaceDetector.create_from_options(options)
+
+#     def _is_blurry(self, image, threshold=80):
+#         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+#         variance = cv2.Laplacian(gray, cv2.CV_64F).var()
+#         return variance < threshold
+
+#     def validate(self, image_path):
+#         img = cv2.imread(image_path)
+#         if img is None:
+#             return False, "Invalid image", None
+
+#         rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+#         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
+
+#         result = self.detector.detect(mp_image)
+#         faces = result.detections or []
+
+#         # 1. No face
+#         if len(faces) == 0:
+#             if self._is_blurry(img):
+#                 return False, "Image is too blurry", None
+#             return False, "No face detected", None
+
+#         # 2. Multiple faces
+#         if len(faces) > 1:
+#             return False, "Multiple faces detected", None
+
+#         # 3. Single face → blur check
+#         bbox = faces[0].bounding_box
+#         x, y, w, h = int(bbox.origin_x), int(bbox.origin_y), int(bbox.width), int(bbox.height)
+
+#         face_crop = img[y:y+h, x:x+w]
+
+#         if self._is_blurry(face_crop):
+#             return False, "Face is blurry", None
+
+#         return True, "Valid image", None
+
+
 import cv2
-from deepface import DeepFace
+import mediapipe as mp
+from pathlib import Path
 
-# This function is responsible for
-def is_blurry(image_path,threshold=100):
-    img=cv2.imread(image_path)
-    gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-    variance = cv2.Laplacian(gray,cv2.CV_64F).var()
-    return variance < threshold
-    
-def face_detection(image_path):
-    try:
-        faces = DeepFace.extract_faces(
-            img_path=image_path,
-            enforce_detection=False
+
+class ImageValidator:
+    def __init__(self, model_asset_path: str):
+        if not Path(model_asset_path).exists():
+            raise FileNotFoundError(f"Model not found: {model_asset_path}")
+
+        BaseOptions = mp.tasks.BaseOptions
+        FaceDetector = mp.tasks.vision.FaceDetector
+        FaceDetectorOptions = mp.tasks.vision.FaceDetectorOptions
+
+        options = FaceDetectorOptions(
+            base_options=BaseOptions(model_asset_path=model_asset_path),
+            min_detection_confidence=0.6  # stable default
         )
-        return faces
-    except Exception:
-        return []
 
-def validate_image(image_path):
-    if is_blurry(image_path):
-        return False, "Error: The Image is Blurry."
-    
-    faces = face_detection(image_path)
+        self.detector = FaceDetector.create_from_options(options)
 
-    if len(faces) == 0:
-        return False, "Invalid Input: No Face was Detected in the uploaded image file."
+    def _is_blurry(self, image, threshold=80):
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        variance = cv2.Laplacian(gray, cv2.CV_64F).var()
+        return variance < threshold
 
-    if len(faces) > 1:
-        return False, "Invalid Input: Multiple Faces detectedin the uploaded image file."
-    
-    return True, "Success: The Uploaded image is valid."
-    
+    def validate(self, image_path):
+        img = cv2.imread(image_path)
+        if img is None:
+            return False, "Invalid image", None
+
+        rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
+
+        result = self.detector.detect(mp_image)
+        faces = result.detections or []
+
+        # 1. No face
+        if len(faces) == 0:
+            return False, "No face detected", None
+
+        # 2. Multiple faces
+        if len(faces) > 1:
+            return False, "Multiple faces detected", None
+
+        # 3. Single face → blur check
+        bbox = faces[0].bounding_box
+        x, y = int(bbox.origin_x), int(bbox.origin_y)
+        w, h = int(bbox.width), int(bbox.height)
+
+        # Safe crop
+        h_img, w_img, _ = img.shape
+        x = max(0, x)
+        y = max(0, y)
+        w = min(w_img - x, w)
+        h = min(h_img - y, h)
+
+        face_crop = img[y:y+h, x:x+w]
+
+        if self._is_blurry(face_crop):
+            return False, "Face is blurry", None
+
+        return True, "Valid image", None

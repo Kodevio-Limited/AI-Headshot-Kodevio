@@ -1,11 +1,19 @@
-from django.shortcuts import render
-from services.validation.service import validate_image
-# Create your views here.
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
 from .models import Job
 from images.models import Image
+
+from services.validator_instance import validator
+
+
+# New view to delete all jobs
+from rest_framework import status
+
+class DeleteAllJobsView(APIView):
+    def delete(self, request):
+        Job.objects.all().delete()
+        return Response({"status": "all jobs deleted"}, status=status.HTTP_204_NO_CONTENT)
 
 
 class CreateJobView(APIView):
@@ -14,11 +22,14 @@ class CreateJobView(APIView):
         return Response({"job_id": job.id})
 
 
-class UploadImageView(APIView): # Upload Image API Endpoint
-    def post(self, request, job_id): 
-        job = Job.objects.get(id=job_id)
+class UploadImageView(APIView):
+    def post(self, request, job_id):
+        try:
+            job = Job.objects.get(id=job_id)
+        except Job.DoesNotExist:
+            return Response({"error": "Job not found"}, status=404)
 
-        files = request.FILES.getlist('images') 
+        files = request.FILES.getlist('images')
 
         if not files:
             return Response({"error": "No images provided"}, status=400)
@@ -26,35 +37,35 @@ class UploadImageView(APIView): # Upload Image API Endpoint
         if len(files) > 5:
             return Response({"error": "Max 5 images allowed"}, status=400)
 
-        # Dummy Upload logic!
-        # for f in files:
-        #     Image.objects.create(job=job, file=f)
-
-        # Image file Upload logic with validation.
         for f in files:
-            image_obj= Image.objects.create(job=job, file=f)
+            # 1. Save first (so we get file path)
+            image_obj = Image.objects.create(job=job, file=f)
 
-            # Validating after Saving the Image file.
-            valid, msg = validate_image(image_obj.file.path)
-            
+            # 2. Validate using singleton
+            valid, msg, data = validator.validate(image_obj.file.path)
+
             if not valid:
-                image_obj.delete
-                
+                # 3. DELETE invalid image properly
+                image_obj.delete()
+
                 return Response({
-                    "error":msg
-                },status=400)
+                    "error": msg
+                }, status=400)
 
         return Response({"status": "uploaded"})
-
-
+    
 class JobStatusView(APIView):
     def get(self, request, job_id):
-        job = Job.objects.get(id=job_id)
+        try:
+            job = Job.objects.get(id=job_id)
+        except Job.DoesNotExist:
+            return Response({"error": "Job not found"}, status=404)
 
         images = job.images.all()
 
         return Response({
             "id": job.id,
             "status": job.status,
-            "images": [img.file.url for img in images]
+            "images": [img.file.url for img in images],
+            "error": job.error_message
         })
