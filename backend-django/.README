@@ -1,0 +1,38 @@
+
+
+
+
+python -m venv .venv
+.venv\Scripts\activate
+
+pip install django
+
+SETUPS:
+
+django-admin startproject backend
+cd backend
+//Installing/adding the folders/ modules
+python manage.py startapp jobs
+python manage.py startapp images
+pip install djangorestframework celery redis pillow opencv-python numpy deepface replicate stripe
+
+
+Note: tensorflow is not supported on python 3.14 version yet.
+
+Updated steps:
+
+py -0
+py -3.13 -m venv .venv
+.venv\Scripts\activate
+python -m pip install --upgrade pip setuptools wheel
+
+pip install django
+pip install tensorflow
+pip install deepface
+
+
+python -c "import tensorflow as tf; print('TF Version:', tf.__version__)"
+
+Remaining Dependencies:
+
+pip install tf-keras
