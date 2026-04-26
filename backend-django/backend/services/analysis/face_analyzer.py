@@ -2,23 +2,6 @@ import cv2
 import numpy as np
 from deepface import DeepFace
 
-# -----------------------------------------------
-# 🔒 Load models ONCE at module level (not per call)
-# -----------------------------------------------
-
-def _get_deepface_result(face_img_bgr):
-    """
-    Run analyze once, cache result.
-    detector_backend=skip because face is already cropped.
-    """
-    return DeepFace.analyze(
-        img_path=face_img_bgr,
-        actions=["age", "gender", "emotion"],
-        detector_backend="skip",
-        enforce_detection=False,
-        silent=True  # suppress per-call logs
-    )
-
 
 # -----------------------------------------------
 # 📸 Blur
@@ -34,18 +17,54 @@ def assess_blur(score):
         return "slightly_blurry"
     return "sharp"
 
-# -----------------------------------------------
-# 🎯 Age Group
-# -----------------------------------------------
-def get_age_group(age):
-    if age < 13: return "child"
-    elif age < 20: return "teen"
-    elif age < 30: return "young adult"
-    elif age < 50: return "adult"
-    return "middle-aged"
 
 # -----------------------------------------------
-# 🧭 Pose
+# 🎯 Age Group (wide buckets — tolerates DeepFace ±7yr errors)
+# -----------------------------------------------
+def get_age_group(age):
+    if age < 18:
+        return "teen"
+    elif age < 35:
+        return "young"
+    elif age < 60:
+        return "adult"
+    return "old"
+
+
+# -----------------------------------------------
+# 🎨 Skin Tone (LAB L-channel — lighting invariant)
+# -----------------------------------------------
+def get_skin_tone(face_img_bgr):
+    h, w = face_img_bgr.shape[:2]
+    cx, cy = w // 2, h // 2
+    sample = face_img_bgr[
+        int(cy * 0.6):int(cy * 1.2),
+        int(cx * 0.6):int(cx * 1.4)
+    ]
+    if sample.size == 0:
+        return {"label": "unknown", "rgb": None}
+
+    lab = cv2.cvtColor(sample, cv2.COLOR_BGR2LAB)
+    L = lab[:, :, 0].mean()
+
+    if L > 200:   label = "very_light"
+    elif L > 170: label = "light"
+    elif L > 140: label = "medium"
+    elif L > 110: label = "tan"
+    elif L > 75:  label = "dark"
+    else:         label = "very_dark"
+
+    avg_bgr = sample.mean(axis=(0, 1))
+    r, g, b = avg_bgr[::-1]
+    return {
+        "label": label,
+        "rgb": [int(r), int(g), int(b)],
+        "luminance": round(float(L), 2)
+    }
+
+
+# -----------------------------------------------
+# 🧭 Pose (only works with retinaface/mtcnn backends)
 # -----------------------------------------------
 def estimate_pose(landmarks):
     if not landmarks:
@@ -64,52 +83,26 @@ def estimate_pose(landmarks):
         return "looking right"
     return "looking left"
 
-# -----------------------------------------------
-# 🎨 Skin Tone
-# -----------------------------------------------
-def get_skin_tone(face_img_bgr):
-    h, w = face_img_bgr.shape[:2]
-    cx, cy = w // 2, h // 2
-    sample = face_img_bgr[
-        int(cy * 0.6):int(cy * 1.2),
-        int(cx * 0.6):int(cx * 1.4)
-    ]
-    if sample.size == 0:
-        return {"label": "unknown", "rgb": None}
-
-    avg_bgr = sample.mean(axis=(0, 1))
-    r, g, b = avg_bgr[::-1]
-    luminance = 0.299 * r + 0.587 * g + 0.114 * b
-
-    if luminance > 200: label = "very_light"
-    elif luminance > 160: label = "light"
-    elif luminance > 120: label = "medium"
-    elif luminance > 80: label = "tan"
-    elif luminance > 50: label = "dark"
-    else: label = "very_dark"
-
-    return {"label": label, "rgb": [int(r), int(g), int(b)], "luminance": round(float(luminance), 2)}
 
 # -----------------------------------------------
 # 🧠 MAIN ANALYZER
 # -----------------------------------------------
 def analyze_face(image_path, include_embedding=False):
     """
-    include_embedding=False by default.
-    Only pass True when you actually need it (at generation time).
+    Main face analysis function.
+    include_embedding=False by default — only pass True at generation time.
     """
     image = cv2.imread(image_path)
     if image is None:
         return {"error": "Invalid image"}
 
+    # --- Blur Check ---
     blur_score = get_blur_score(image)
     blur_status = assess_blur(blur_score)
     if blur_status == "blurry":
         return {"error": "Image too blurry"}
 
-    # --- Detection: try light backends first ---
-    # opencv is fastest, retinaface most accurate
-    # Flip priority for speed: opencv → mtcnn → retinaface
+    # --- Face Detection (fast → accurate fallback) ---
     backends = ["opencv", "mtcnn", "retinaface"]
     faces = []
     used_backend = None
@@ -138,19 +131,28 @@ def analyze_face(image_path, include_embedding=False):
     face_img_bgr = cv2.cvtColor(face_img_rgb, cv2.COLOR_RGB2BGR)
     landmarks = face_obj.get("landmarks", {})
 
-    # --- Attribute Analysis (models cached, not reloaded) ---
+    # --- Attribute Analysis ---
     try:
-        analysis = _get_deepface_result(face_img_bgr)
+        analysis = DeepFace.analyze(
+            img_path=face_img_bgr,
+            actions=["age", "gender", "emotion"],
+            detector_backend="skip",
+            enforce_detection=False,
+            silent=True
+        )
         if isinstance(analysis, list):
             analysis = analysis[0]
+
         raw_age = int(analysis["age"])
-        age = min(raw_age + 3, 99)
         gender_dict = analysis["gender"]
         emotion_dict = analysis["emotion"]
+        gender_label = max(gender_dict, key=gender_dict.get)
+        emotion_label = max(emotion_dict, key=emotion_dict.get)
+
     except Exception as e:
         return {"error": f"Analysis failed: {str(e)}"}
 
-    # --- Embedding (OPTIONAL — skip during validation) ---
+    # --- Embedding (optional — only at generation time) ---
     embedding = None
     if include_embedding:
         try:
@@ -164,15 +166,12 @@ def analyze_face(image_path, include_embedding=False):
         except Exception as e:
             return {"error": f"Embedding failed: {str(e)}"}
 
+    # --- Build Result ---
     skin_tone = get_skin_tone(face_img_bgr)
-    age_range = f"{max(0, age - 5)}-{age + 5}"
-    gender_label = max(gender_dict, key=gender_dict.get)
-    emotion_label = max(emotion_dict, key=emotion_dict.get)
 
     result = {
-        "age_estimated": age,
-        "age_range": age_range,
-        "age_group": get_age_group(age),
+        "age_group": get_age_group(raw_age),
+        "age_raw": raw_age,
         "gender": {
             "label": gender_label.lower(),
             "confidence": round(float(gender_dict[gender_label]), 2)

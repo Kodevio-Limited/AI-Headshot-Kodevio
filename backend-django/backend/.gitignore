@@ -66,3 +66,7 @@ yarn.lock
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Keep the media folder, ignore everything inside it
+media/*
+!media/.gitkeep
