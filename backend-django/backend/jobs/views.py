@@ -1,14 +1,15 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 
 from .models import Job
 from images.models import Image
 
 from services.validator_instance import validator
-from services.analysis.face_analyzer import analyze_face
+from services.analysis.face_analyzer import analyze_face, normalize_analysis
+from services.generation.prompt_builder import build_prompt
+from services.generation.generator import generate_headshot
 
-# New view to delete all jobs
-from rest_framework import status
 
 class DeleteAllJobsView(APIView):
     def delete(self, request):
@@ -37,24 +38,76 @@ class UploadImageView(APIView):
         if len(files) > 5:
             return Response({"error": "Max 5 images allowed"}, status=400)
 
-        for f in files:
-            # 1. Save first (so we get file path)
-            image_obj = Image.objects.create(job=job, file=f)
+        job.status = "PROCESSING"
+        job.save()
 
-            # 2. Validate using singleton
-            valid, msg, data = validator.validate(image_obj.file.path)
+        for f in files:
+            # ----------------------------
+            # 1. Save image
+            # ----------------------------
+            image_obj = Image.objects.create(job=job, file=f, type="INPUT")
+
+            # ----------------------------
+            # 2. Validate
+            # ----------------------------
+            valid, msg, _ = validator.validate(image_obj.file.path)
 
             if not valid:
-                # 3. DELETE invalid image properly
                 image_obj.delete()
+                job.status = "FAILED"
+                job.error_message = msg
+                job.save()
                 return Response({"error": msg}, status=400)
-            
-            #  4. If valid, analyze and save results
-            analysis_data = analyze_face(image_obj.file.path)
-            print("ANALYSIS:", analysis_data)  # debug for now
 
-        return Response({"status": "uploaded"})
-    
+            # ----------------------------
+            # 3. Analyze
+            # ----------------------------
+            raw_analysis = analyze_face(image_obj.file.path)
+
+            if "error" in raw_analysis:
+                job.status = "FAILED"
+                job.error_message = raw_analysis["error"]
+                job.save()
+                return Response({"error": raw_analysis["error"]}, status=400)
+
+            # ----------------------------
+            # 4. Normalize
+            # ----------------------------
+            normalized = normalize_analysis(raw_analysis)
+
+            # ----------------------------
+            # 5. Build Prompt
+            # ----------------------------
+            prompt_data = build_prompt(normalized)
+
+            # ----------------------------
+            # 6. Generate (InstantID)
+            # ----------------------------
+            result = generate_headshot(image_obj.file.path, prompt_data)
+
+            if "error" in result:
+                job.status = "FAILED"
+                job.error_message = result["error"]
+                job.save()
+                return Response({"error": result["error"]}, status=500)
+
+            output_url = result["url"]
+
+            # ----------------------------
+            # 7. Save Output (TEMP: URL)
+            # ----------------------------
+            Image.objects.create(
+                job=job,
+                file=output_url,   # ⚠️ URL for now (Phase 5 will fix storage)
+                type="OUTPUT"
+            )
+
+        job.status = "COMPLETED"
+        job.save()
+
+        return Response({"status": "completed"})
+
+
 class JobStatusView(APIView):
     def get(self, request, job_id):
         try:
