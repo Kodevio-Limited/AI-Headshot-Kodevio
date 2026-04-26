@@ -193,3 +193,36 @@ def analyze_face(image_path, include_embedding=False):
         result["embedding"] = embedding
 
     return result
+
+
+
+# -----------------------------------------------
+# 🎯 NORMALIZATION LAYER (analysis → prompt-ready)
+# -----------------------------------------------
+def normalize_analysis(data):
+    age = data.get("age_raw", 25)
+    age_group = data.get("age_group", "adult")
+    gender = data.get("gender", {}).get("label", "person")
+    emotion = data.get("emotion", {}).get("dominant", "neutral").lower()
+
+    # --- Age-aware gender text ---
+    if age < 16:
+        gender_text = "girl" if gender == "woman" else "boy"
+    else:
+        gender_text = "woman" if gender == "woman" else "man"
+
+    # --- Flatten emotion ---
+    if emotion in ["happy", "surprise"]:
+        emotion_text = "slight smile"
+    else:
+        emotion_text = "neutral expression"
+
+    # --- Age text ---
+    age_text = f"{age_group}"  # just "teen", "young", "adult", "old"
+
+    return {
+        "age_text": age_text,
+        "gender_text": gender_text,
+        "emotion_text": emotion_text,
+        "skin_text": data.get("skin_tone", {}).get("label", "medium")
+    }
