@@ -1,3 +1,5 @@
+# feat: prompt engineering for identity preservation in headshot generation
+
 SKIN_TONE_MAP = {
     "very_light": "fair skin",
     "light":      "light skin",
