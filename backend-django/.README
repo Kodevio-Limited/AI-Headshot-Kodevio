@@ -47,3 +47,9 @@ rakesh.kodevio@gmail.com
 
 
 pip install djangorestframework
+
+
+
+docker run -d -p 6379:6379 redis
+docker --version
+docker exec -it <container_id> redis-cli
