@@ -1,4 +1,6 @@
-from tkinter import Image
+from asyncio.log import logger
+
+from images.models import Image   #feat: 6.0.1- Bug fixed.
 
 from services.analysis.face_analyzer import analyze_face
 from services.analysis.face_analyzer import normalize_analysis
@@ -17,6 +19,10 @@ def process_image(image_path):
 
     # 3. Build prompt
     prompts = build_prompt(normalized)
+    
+    # Debugging line to check generated prompts
+    # logging in the terminal here:
+    logger.info(f"Generated Prompts: {prompts}")
     
     #4.5. Upload original image to Cloudinary so that Replicate can access it (Phase 5 will fix this storage issue)
     image_url = upload_to_cloudinary(image_path)

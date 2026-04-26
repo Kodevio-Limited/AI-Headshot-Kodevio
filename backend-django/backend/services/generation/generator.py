@@ -10,7 +10,6 @@ def generate_headshot(image_url, prompt):
         "flux-kontext-apps/professional-headshot",
         input={
             "input_image": image_url,
-            "gender": "male",              # optional but good
             "background": "neutral",       # optional
             "aspect_ratio": "1:1",
             "prompt": prompt,

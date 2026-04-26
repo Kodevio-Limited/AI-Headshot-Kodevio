@@ -16,7 +16,6 @@ def process_job(job_id):
     try:
         # What we have done here is, have Single source of truth
         run_pipeline(job)
-
         job.status = "COMPLETED"
 
     except Exception as e:
