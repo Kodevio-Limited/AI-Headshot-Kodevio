@@ -38,11 +38,11 @@ class ImageValidator:
 
         # 1. No face
         if len(faces) == 0:
-            return False, "No face detected", None
+            return False, "Validation failed: No face detected", None
 
         # 2. Multiple faces
         if len(faces) > 1:
-            return False, "Multiple faces detected", None
+            return False, "Validation failed: Multiple faces detected", None
 
         # 3. Single face → blur check
         bbox = faces[0].bounding_box
@@ -59,9 +59,9 @@ class ImageValidator:
         face_crop = img[y:y+h, x:x+w]
 
         if self._is_blurry(face_crop):
-            return False, "Face is blurry", None
+            return False, "Validation failed: Face is blurry", None
 
-        return True, "Valid image", None
+        return True, "Validation passed: Valid image", None
 
 
 
@@ -105,12 +105,12 @@ class ImageValidator:
 #         # 1. No face
 #         if len(faces) == 0:
 #             if self._is_blurry(img):
-#                 return False, "Image is too blurry", None
-#             return False, "No face detected", None
+#                 return False, "Validation failed: Image is too blurry", None
+#             return False, "Validation failed: No face detected", None
 
 #         # 2. Multiple faces
 #         if len(faces) > 1:
-#             return False, "Multiple faces detected", None
+#             return False, "Validation failed: Multiple faces detected", None
 
 #         # 3. Single face → blur check
 #         bbox = faces[0].bounding_box
@@ -119,7 +119,7 @@ class ImageValidator:
 #         face_crop = img[y:y+h, x:x+w]
 
 #         if self._is_blurry(face_crop):
-#             return False, "Face is blurry", None
+#             return False, "Validation failed: Face is blurry", None
 
-#         return True, "Valid image", None
+#         return True, "Validation passed: Valid image", None
 
