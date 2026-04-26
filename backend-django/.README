@@ -53,3 +53,9 @@ pip install djangorestframework
 docker run -d -p 6379:6379 redis
 docker --version
 docker exec -it <container_id> redis-cli
+
+
+
+
+celery -A config worker -l info --pool=solo
+

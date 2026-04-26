@@ -6,10 +6,7 @@ from .models import Job
 from images.models import Image
 
 from services.validator_instance import validator
-from services.analysis.face_analyzer import analyze_face, normalize_analysis
-from services.generation.prompt_builder import build_prompt
-from services.generation.generator import generate_headshot
-from services.pipeline import process_image   # feat: v4.3.0- import pipeline
+from jobs.tasks import process_job
 
 class DeleteAllJobsView(APIView):
     def delete(self, request):
@@ -21,6 +18,7 @@ class CreateJobView(APIView):
     def post(self, request):
         job = Job.objects.create()
         return Response({"job_id": job.id})
+    
 
 class UploadImageView(APIView):
     def post(self, request, job_id):
@@ -41,10 +39,8 @@ class UploadImageView(APIView):
         job.save()
 
         for f in files:
-            # 1. Save input image
             image_obj = Image.objects.create(job=job, file=f, type="INPUT")
 
-            # 2. Validate
             valid, msg, _ = validator.validate(image_obj.file.path)
 
             if not valid:
@@ -54,26 +50,10 @@ class UploadImageView(APIView):
                 job.save()
                 return Response({"error": msg}, status=400)
 
-            # 🔥 3. USE PIPELINE (single source of truth)
-            result = process_image(image_obj.file.path)
+        # feat: v5.0.1 - Trigger asynchronous processing of the job using Celery. This allows the server to handle the image upload request quickly while offloading the intensive processing tasks to a background worker, improving responsiveness and scalability of the application.
+        process_job.delay(job.id)
 
-            if "error" in result:
-                job.status = "FAILED"
-                job.error_message = result["error"]
-                job.save()
-                return Response({"error": result["error"]}, status=500)
-
-            # 4. Save output
-            Image.objects.create(
-                job=job,
-                generated_url=result["output"],
-                type="OUTPUT"
-            )
-
-        job.status = "COMPLETED"
-        job.save()
-
-        return Response({"status": "completed"})
+        return Response({"status": "uploaded, processing started"})
     
     
     
@@ -89,7 +69,8 @@ class JobStatusView(APIView):
         return Response({
             "id": job.id,
             "status": job.status,
-            "images": [ img.file.url if img.type == "INPUT" else img.generated_url
+            "images": [ 
+                        img.file.url if img.type == "INPUT" else img.generated_url
                         for img in images
                       ],
             "error": job.error_message

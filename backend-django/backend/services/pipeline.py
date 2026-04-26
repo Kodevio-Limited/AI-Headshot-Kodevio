@@ -1,3 +1,5 @@
+from tkinter import Image
+
 from services.analysis.face_analyzer import analyze_face
 from services.analysis.face_analyzer import normalize_analysis
 from services.generation.prompt_builder import build_prompt
@@ -26,3 +28,25 @@ def process_image(image_path):
         "analysis": normalized,
         "output": output_url
     }
+    
+
+# feat: v5.0.1 - Added Run pipeline function to orchestrate the entire process for a given job. This function retrieves all input images associated with the job, processes each image through the existing pipeline (validation, analysis, generation), and saves the generated output back to the database. This modular approach allows for better separation of concerns and makes it easier to manage the processing flow for each job.
+def run_pipeline(job):
+    input_images = job.images.filter(type="INPUT")
+
+    if not input_images.exists():
+        raise Exception("No input images found")
+
+    for image in input_images:
+        result = process_image(image.file.path)
+
+        if "error" in result:
+            raise Exception(result["error"])
+
+        # Save output
+        Image.objects.create(
+            job=job,
+            generated_url=result["output"],
+            type="OUTPUT"
+        )    
+    
