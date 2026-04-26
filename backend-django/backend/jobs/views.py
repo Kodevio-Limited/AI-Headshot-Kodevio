@@ -66,7 +66,7 @@ class UploadImageView(APIView):
             # 4. Save output
             Image.objects.create(
                 job=job,
-                file=result["output"],
+                generated_url=result["output"],
                 type="OUTPUT"
             )
 
@@ -89,6 +89,8 @@ class JobStatusView(APIView):
         return Response({
             "id": job.id,
             "status": job.status,
-            "images": [img.file.url for img in images],
+            "images": [ img.file.url if img.type == "INPUT" else img.generated_url
+                        for img in images
+                      ],
             "error": job.error_message
         })

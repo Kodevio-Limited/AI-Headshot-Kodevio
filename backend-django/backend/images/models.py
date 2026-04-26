@@ -13,7 +13,11 @@ class Image(models.Model):
         related_name="images"
     )
 
-    file = models.ImageField(upload_to="jobs/")
+    # ✅ For uploaded images
+    file = models.ImageField(upload_to="jobs/", null=True, blank=True)
+
+    # ✅ For AI generated images
+    generated_url = models.URLField(null=True, blank=True)
 
     type = models.CharField(
         max_length=10,
