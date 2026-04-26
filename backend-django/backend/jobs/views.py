@@ -9,7 +9,7 @@ from services.validator_instance import validator
 from services.analysis.face_analyzer import analyze_face, normalize_analysis
 from services.generation.prompt_builder import build_prompt
 from services.generation.generator import generate_headshot
-
+from services.pipeline import process_image   # feat: v4.3.0- import pipeline
 
 class DeleteAllJobsView(APIView):
     def delete(self, request):
@@ -21,7 +21,6 @@ class CreateJobView(APIView):
     def post(self, request):
         job = Job.objects.create()
         return Response({"job_id": job.id})
-
 
 class UploadImageView(APIView):
     def post(self, request, job_id):
@@ -42,14 +41,10 @@ class UploadImageView(APIView):
         job.save()
 
         for f in files:
-            # ----------------------------
-            # 1. Save image
-            # ----------------------------
+            # 1. Save input image
             image_obj = Image.objects.create(job=job, file=f, type="INPUT")
 
-            # ----------------------------
             # 2. Validate
-            # ----------------------------
             valid, msg, _ = validator.validate(image_obj.file.path)
 
             if not valid:
@@ -59,31 +54,8 @@ class UploadImageView(APIView):
                 job.save()
                 return Response({"error": msg}, status=400)
 
-            # ----------------------------
-            # 3. Analyze
-            # ----------------------------
-            raw_analysis = analyze_face(image_obj.file.path)
-
-            if "error" in raw_analysis:
-                job.status = "FAILED"
-                job.error_message = raw_analysis["error"]
-                job.save()
-                return Response({"error": raw_analysis["error"]}, status=400)
-
-            # ----------------------------
-            # 4. Normalize
-            # ----------------------------
-            normalized = normalize_analysis(raw_analysis)
-
-            # ----------------------------
-            # 5. Build Prompt
-            # ----------------------------
-            prompt_data = build_prompt(normalized)
-
-            # ----------------------------
-            # 6. Generate (InstantID)
-            # ----------------------------
-            result = generate_headshot(image_obj.file.path, prompt_data)
+            # 🔥 3. USE PIPELINE (single source of truth)
+            result = process_image(image_obj.file.path)
 
             if "error" in result:
                 job.status = "FAILED"
@@ -91,14 +63,10 @@ class UploadImageView(APIView):
                 job.save()
                 return Response({"error": result["error"]}, status=500)
 
-            output_url = result["url"]
-
-            # ----------------------------
-            # 7. Save Output (TEMP: URL)
-            # ----------------------------
+            # 4. Save output
             Image.objects.create(
                 job=job,
-                file=output_url,   # ⚠️ URL for now (Phase 5 will fix storage)
+                file=result["output"],
                 type="OUTPUT"
             )
 
@@ -106,8 +74,9 @@ class UploadImageView(APIView):
         job.save()
 
         return Response({"status": "completed"})
-
-
+    
+    
+    
 class JobStatusView(APIView):
     def get(self, request, job_id):
         try:
