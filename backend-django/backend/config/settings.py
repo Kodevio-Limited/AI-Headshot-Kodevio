@@ -20,6 +20,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+#  ======================================================================================================================
+#  = dev only Config ==================================================================================================
+CORS_ALLOW_ALL_ORIGINS = True  # dev only
+
+
+#  ======================================================================================================================
 
 import cloudinary
 
@@ -40,6 +46,20 @@ EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool)
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+# feat: v11.0.0 - Adding Logging for admin dashboard.
+LOGGING = {
+    "version": 1,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+}
 
 
 # Quick-start development settings - unsuitable for production
@@ -72,6 +92,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # External Apps
+    'corsheaders',
+    'rest_framework',
+    'cloudinary',
     
     # These are the apps we created for our project
     'jobs.apps.JobsConfig',
