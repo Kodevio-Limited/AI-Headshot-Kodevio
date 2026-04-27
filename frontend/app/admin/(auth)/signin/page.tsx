@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
+import { signIn } from "@/lib/api/auth";
 
 const signinSchema = z.object({
     email: z.email("Enter your email address"),
@@ -19,7 +20,7 @@ export default function Signin() {
         defaultValues: { email: "", password: "", remember: false },
         validators: { onChange: signinSchema },
         onSubmit: async ({ value }) => {
-            console.log("Signin:", value);
+            await signIn(value);
             router.push("/admin");
         },
     });

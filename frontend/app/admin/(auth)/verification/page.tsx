@@ -5,6 +5,7 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
+import { verifyOTP } from "@/lib/api/auth";
 
 const verifySchema = z.object({
     code: z.string().length(6, "Enter the 6-digit code"),
@@ -17,7 +18,7 @@ export default function Verify() {
         defaultValues: { code: "" },
         validators: { onChange: verifySchema },
         onSubmit: async ({ value }) => {
-            console.log("Verify code:", value);
+            await verifyOTP(value.code);
             router.push("/admin/reset-password");
         },
     });
