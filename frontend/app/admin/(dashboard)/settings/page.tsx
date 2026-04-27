@@ -196,7 +196,7 @@ export default function SettingsPage() {
     }, [activeTab]);
 
     return (
-        <section className="w-full space-y-6">
+        <section className="w-full h-full">
             <div className="dashboard-page-header">
                 <h1 className="dashboard-page-title">Settings</h1>
                 <p className="dashboard-page-subtitle">Customize your experience and account details.</p>

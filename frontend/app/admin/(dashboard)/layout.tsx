@@ -3,7 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { LayoutGrid, Menu, QrCode, Settings, Music2 } from "lucide-react";
+import { LayoutGrid, Menu, Settings, User, Briefcase } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -14,8 +14,8 @@ function SidebarNav() { // This component is used in both the mobile sheet and t
 
     const navItems = [
         { label: "Dashboard", href: "/admin", icon: LayoutGrid },
-        { label: "Songs", href: "/admin/songs", icon: Music2 },
-        { label: "QR Mapping", href: "/admin/qr-mapping", icon: QrCode },
+        { label: "Jobs", href: "/admin/jobs", icon: Briefcase },
+        { label: "Users", href: "/admin/users", icon: User },
         { label: "Settings", href: "/admin/settings", icon: Settings },
     ];
 
@@ -24,7 +24,6 @@ function SidebarNav() { // This component is used in both the mobile sheet and t
             {navItems.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
-
                 return (
                     <Link
                         key={item.href}
@@ -98,7 +97,7 @@ export default function DashboardLayout({ children }: Readonly<{ children: React
                 </aside>
 
                 {/* Main Content */}
-                <main className="flex-1 p-6 md:ml-63.25 md:px-7.5 md:pt-10">{children}</main>
+                <main className="flex-1 p-6 lg:p-10 md:ml-63.25">{children}</main>
             </div>
         </div>
     );

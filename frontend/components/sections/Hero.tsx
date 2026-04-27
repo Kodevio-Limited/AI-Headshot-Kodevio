@@ -51,16 +51,7 @@ export default function Hero() {
   }, []);
 
 
-  const handleDrop = useCallback((e: React.DragEvent) => { // When a file is dropped onto the upload area
-    e.preventDefault(); // Prevent default behavior (e.g., opening the file in the browser)
-    setIsDragging(false); // Reset dragging state to false to remove drag styling
-    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')); // Filter out non-image files
-    if (files.length) { //valid images, process them.
-      handleFiles(files);
-    }
-  }, []);
-
-  const handleFiles = (files: File[]) => { // Convert files to data URLs for preview
+  function handleFiles(files: File[]) { // Convert files to data URLs for preview
     const readers = files.map(file => {
       return new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -72,7 +63,16 @@ export default function Hero() {
     Promise.all(readers).then(imgs => { // Once all files are read, update the images state with the new previews
       setImages(prev => [...prev, ...imgs]);
     });
-  };
+  }
+
+  const handleDrop = useCallback((e: React.DragEvent) => { // When a file is dropped onto the upload area
+    e.preventDefault(); // Prevent default behavior (e.g., opening the file in the browser)
+    setIsDragging(false); // Reset dragging state to false to remove drag styling
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')); // Filter out non-image files
+    if (files.length) { //valid images, process them.
+      handleFiles(files);
+    }
+  }, []);
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => { // When a file is selected via the file input
     if (e.target.files) {
@@ -197,19 +197,19 @@ export default function Hero() {
                 >
                   {images.length > 0
                     ? images.map((img, idx) => (
-                        <div
-                          key={idx}
-                          className="aspect-square overflow-hidden rounded-xl bg-muted shrink-0"
-                          style={images.length > 3 ? { minWidth: 90, width: 90, maxWidth: 120 } : {}}
-                        >
-                          <Image src={img} alt={`Uploaded ${idx + 1}`} width={200} height={200} className="h-full w-full object-cover" />
-                        </div>
-                      ))
+                      <div
+                        key={idx}
+                        className="aspect-square overflow-hidden rounded-xl bg-muted shrink-0"
+                        style={images.length > 3 ? { minWidth: 90, width: 90, maxWidth: 120 } : {}}
+                      >
+                        <Image src={img} alt={`Uploaded ${idx + 1}`} width={200} height={200} className="h-full w-full object-cover" />
+                      </div>
+                    ))
                     : [1, 2, 3].map((i) => (
-                        <div key={i} className="aspect-square overflow-hidden rounded-xl bg-muted">
-                          <Image src={`/dummy-image-square.jpg`} alt={`Headshot style ${i}`} width={200} height={200} className="h-full w-full object-cover" />
-                        </div>
-                      ))}
+                      <div key={i} className="aspect-square overflow-hidden rounded-xl bg-muted">
+                        <Image src={`/dummy-image-square.jpg`} alt={`Headshot style ${i}`} width={200} height={200} className="h-full w-full object-cover" />
+                      </div>
+                    ))}
                 </div>
               </div>
 
@@ -236,34 +236,34 @@ export default function Hero() {
                   />
 
                 </div>
-                
+
                 {/* feat: v2.1.1 - Conditional, if one or more images are uploaded then select photo is replaced by two buttons "Cancel" and "Generate AI Headshot" */}
                 {images.length > 0 ? (
                   <div className="mt-6 flex items-center justify-between gap-4">
-                      <Button
-                        size="lg"
-                        className="flex-1 bg-destructive text-destructive-foreground font-medium hover:bg-destructive/90"
-                        onClick={handleCancelUpload}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
+                    <Button
+                      size="lg"
+                      className="flex-1 bg-destructive text-destructive-foreground font-medium hover:bg-destructive/90"
+                      onClick={handleCancelUpload}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
                       size="lg"
                       className="flex-1 bg-primary text-primary-foreground font-medium hover:bg-primary/90"
                       onClick={handleGenerateAIHeadshot}
-                      >
+                    >
                       Generate AI Headshot
-                     </Button>
+                    </Button>
                   </div>
-                ):(
-                <Button
-                  size="lg"
-                  className="mt-6 w-full bg-accent text-accent-foreground font-medium hover:bg-accent/90"
-                  onClick={handleUploadClick}
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  Select Photo
-                </Button>
+                ) : (
+                  <Button
+                    size="lg"
+                    className="mt-6 w-full bg-accent text-accent-foreground font-medium hover:bg-accent/90"
+                    onClick={handleUploadClick}
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Select Photo
+                  </Button>
                 )}
 
                 <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
