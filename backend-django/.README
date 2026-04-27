@@ -67,7 +67,7 @@ git branch feature/async-processing
 git checkout feature/async-processing
 git push -u origin feature/async-processing
 pip freeze > requirements.txt
-
+pip install -r requirements.txt
 
 
 django> python --version             

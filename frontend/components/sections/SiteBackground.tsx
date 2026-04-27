@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import PixelBlast from "@/components/PixelBlast";
+import PixelBlast from "@/components/sections/PixelBlast";
 
 function readThemeVar(name: string, fallback: string) {
   if (typeof window === "undefined") return fallback;
