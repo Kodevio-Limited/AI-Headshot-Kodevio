@@ -73,7 +73,16 @@ class UploadImageView(APIView):
 
             valid_images.append(img)
 
+        # feat: v8.1.2 - If no valid images, fail early
+        if not valid_images:
+            job.status = Job.Status.FAILED
+            job.error_message = "All images failed validation"
+            job.save()
 
+            return Response({
+                "error": "All images invalid",
+                "details": rejected_images
+            }, status=400)
 
         # feat: v8.0.0 - Selecting the best image based on the score
         valid_images.sort(key=lambda x: x.score, reverse=True)
