@@ -68,3 +68,7 @@ git checkout feature/async-processing
 git push -u origin feature/async-processing
 pip freeze > requirements.txt
 
+
+
+django> python --version             
+Python 3.10.11
