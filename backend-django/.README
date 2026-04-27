@@ -1,0 +1,74 @@
+
+
+
+
+python -m venv .venv
+.venv\Scripts\activate
+
+pip install django
+
+SETUPS:
+
+django-admin startproject backend
+cd backend
+//Installing/adding the folders/ modules
+python manage.py startapp jobs
+python manage.py startapp images
+pip install djangorestframework celery redis pillow opencv-python numpy deepface replicate stripe
+
+
+Note: tensorflow is not supported on python 3.14 version yet.
+
+Updated steps:
+
+py -0
+py -3.13 -m venv .venv
+.venv\Scripts\activate
+python -m pip install --upgrade pip setuptools wheel
+
+pip install django
+pip install tensorflow
+pip install deepface
+
+
+python -c "import tensorflow as tf; print('TF Version:', tf.__version__)"
+
+Remaining Dependencies:
+
+pip install tf-keras
+
+
+
+python manage.py createsuperuser
+
+user
+rakesh.kodevio@gmail.com
+123456
+
+
+pip install djangorestframework
+
+
+python run migrate
+
+cd ai-Headshot-Kodevio/backend-django
+venv\Scripts\activate
+
+docker run -d -p 6379:6379 redis
+docker --version
+docker ps
+docker exec -it <container_id> redis-cli
+docker exec -it a1f23dd2152e redis-cli
+
+celery -A config worker -l info --pool=solo
+python manage.py runserver
+
+git branch feature/async-processing
+git checkout feature/async-processing
+git push -u origin feature/async-processing
+pip freeze > requirements.txt
+
+
+
+django> python --version             
+Python 3.10.11
