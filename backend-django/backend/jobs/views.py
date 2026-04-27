@@ -19,6 +19,7 @@ class DeleteAllJobsView(APIView):
 
 class CreateJobView(APIView):
     def post(self, request):
+        
         job = Job.objects.create()
         return Response({"job_id": job.id})
 
