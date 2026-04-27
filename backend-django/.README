@@ -49,13 +49,22 @@ rakesh.kodevio@gmail.com
 pip install djangorestframework
 
 
+python run migrate
+
+cd ai-Headshot-Kodevio/backend-django
+venv\Scripts\activate
 
 docker run -d -p 6379:6379 redis
 docker --version
+docker ps
 docker exec -it <container_id> redis-cli
-
-
-
+docker exec -it a1f23dd2152e redis-cli
 
 celery -A config worker -l info --pool=solo
+python manage.py runserver
+
+git branch feature/async-processing
+git checkout feature/async-processing
+git push -u origin feature/async-processing
+pip freeze > requirements.txt
 

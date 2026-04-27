@@ -12,6 +12,8 @@ def generate_headshot(image_url, prompt):
             "input_image": image_url,
             "background": "neutral",       # optional
             "aspect_ratio": "1:1",
+            "output_format": "png",
+            "safety_tolerance": 2,        
             "prompt": prompt,
         }
     )
