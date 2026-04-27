@@ -1,6 +1,8 @@
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from services.score.scoring import score_image #feat: v8.0.0 - Importing Score Image function
 
 from .models import Job
 from images.models import Image
@@ -23,10 +25,15 @@ class CreateJobView(APIView):
 class UploadImageView(APIView):
     def post(self, request, job_id):
         try:
-            job = Job.objects.get(id=job_id)
+            job = Job.objects.get(id=job_id) # Retriving the job using job_id
         except Job.DoesNotExist:
             return Response({"error": "Job not found"}, status=404)
 
+        # feat: v8.0.0 - Stripe Payment Status check.
+        if job.payment_status != Job.PaymentStatus.PAID:
+            return Response({"error": "Payment not completed"}, status=400)
+
+        # Uploading image 
         files = request.FILES.getlist('images')
 
         if not files:
@@ -35,6 +42,27 @@ class UploadImageView(APIView):
         if len(files) > 5:
             return Response({"error": "Max 5 images allowed"}, status=400)
 
+        # feat: v8.0.0 - Image Scoring System
+        scored_images = []
+        for f in files:
+            img = Image.objects.create(
+                job=job,
+                file=f,
+                type="INPUT"
+            )
+
+            # Socring Images
+            score= score_image(img.file.path)
+
+            img.score = score
+            img.save()
+
+            scored_images.append(img)
+
+        #feat: v8.0.0 - Selecting the best image based on the score
+        scored_images.sort(key=lambda x: x.score, reverse=True)
+
+        job.best_image = scored_images[0] # feat: v8.0.0 - Assigning best image to job
         job.status = "PROCESSING"
         job.save()
 
