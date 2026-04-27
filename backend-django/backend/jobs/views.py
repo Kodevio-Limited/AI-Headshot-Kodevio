@@ -1,14 +1,15 @@
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from services.score.scoring import score_image #feat: v8.0.0 - Importing Score Image function
+
+from services.score.scoring import score_image  # feat: v8.0.0 - Importing Score Image function
 
 from .models import Job
 from images.models import Image
 
 from services.validator_instance import validator
 from jobs.tasks import process_job
+
 
 class DeleteAllJobsView(APIView):
     def delete(self, request):
@@ -20,12 +21,12 @@ class CreateJobView(APIView):
     def post(self, request):
         job = Job.objects.create()
         return Response({"job_id": job.id})
-    
+
 
 class UploadImageView(APIView):
     def post(self, request, job_id):
         try:
-            job = Job.objects.get(id=job_id) # Retriving the job using job_id
+            job = Job.objects.get(id=job_id)  # Retriving the job using job_id
         except Job.DoesNotExist:
             return Response({"error": "Job not found"}, status=404)
 
@@ -33,7 +34,7 @@ class UploadImageView(APIView):
         if job.payment_status != Job.PaymentStatus.PAID:
             return Response({"error": "Payment not completed"}, status=400)
 
-        # Uploading image 
+        # Uploading image
         files = request.FILES.getlist('images')
 
         if not files:
@@ -43,48 +44,57 @@ class UploadImageView(APIView):
             return Response({"error": "Max 5 images allowed"}, status=400)
 
         # feat: v8.0.0 - Image Scoring System
-        scored_images = []
+        valid_images = []
+        rejected_images = []
+
         for f in files:
             img = Image.objects.create(
                 job=job,
                 file=f,
-                type="INPUT"
+                type=Image.Type.INPUT
             )
 
-            # Socring Images
-            score= score_image(img.file.path)
+            # feat: v8.1.1 - Validation using MediaPipe
+            valid, msg, face_info = validator.validate(img.file.path)
+
+            if not valid:
+                rejected_images.append({
+                    "file": f.name,
+                    "reason": msg
+                })
+                img.delete()
+                continue
+
+            # feat: v8.0.0 - Scoring Images (after validation)
+            score = score_image(img.file.path, face_info)
 
             img.score = score
             img.save()
 
-            scored_images.append(img)
+            valid_images.append(img)
 
-        #feat: v8.0.0 - Selecting the best image based on the score
-        scored_images.sort(key=lambda x: x.score, reverse=True)
 
-        job.best_image = scored_images[0] # feat: v8.0.0 - Assigning best image to job
-        job.status = "PROCESSING"
+
+        # feat: v8.0.0 - Selecting the best image based on the score
+        valid_images.sort(key=lambda x: x.score, reverse=True)
+
+        best_image = valid_images[0]
+
+        job.best_image = best_image  # feat: v8.0.0 - Assigning best image to job
+        job.status = Job.Status.PROCESSING
         job.save()
 
-        for f in files:
-            image_obj = Image.objects.create(job=job, file=f, type="INPUT")
-
-            valid, msg, _ = validator.validate(image_obj.file.path)
-
-            if not valid:
-                image_obj.delete()
-                job.status = "FAILED"
-                job.error_message = msg
-                job.save()
-                return Response({"error": msg}, status=400)
-
-        # feat: v5.0.1 - Trigger asynchronous processing of the job using Celery. This allows the server to handle the image upload request quickly while offloading the intensive processing tasks to a background worker, improving responsiveness and scalability of the application.
+        # feat: v5.0.1 - Trigger asynchronous processing of the job using Celery.
         process_job.delay(job.id)
 
-        return Response({"status": "uploaded, processing started"})
-    
-    
-    
+        return Response({
+            "status": "uploaded, processing started",
+            "uploaded_count": len(valid_images),
+            "rejected": rejected_images,
+            "best_image_id": best_image.id
+        })
+
+
 class JobStatusView(APIView):
     def get(self, request, job_id):
         try:
@@ -92,14 +102,18 @@ class JobStatusView(APIView):
         except Job.DoesNotExist:
             return Response({"error": "Job not found"}, status=404)
 
-        images = job.images.all()
+        input_images = job.images.filter(type=Image.Type.INPUT)
+        output_images = job.images.filter(type=Image.Type.OUTPUT)
 
         return Response({
             "id": job.id,
             "status": job.status,
-            "images": [ 
-                        img.file.url if img.type == "INPUT" else img.generated_url
-                        for img in images
-                      ],
+            "input_images": [
+                img.file.url for img in input_images if img.file
+            ],
+            "output_images": [
+                img.url for img in output_images if img.url
+            ],
+            "best_image": job.best_image.file.url if job.best_image else None,
             "error": job.error_message
         })
