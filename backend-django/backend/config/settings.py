@@ -46,6 +46,10 @@ import os
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# ADDING FRONTEND BASE
+from decouple import config
+FRONTEND_BASE_URL = config("FRONTEND_BASE_URL")
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -59,6 +63,7 @@ INSTALLED_APPS = [
     # These are the apps we created for our project
     'jobs.apps.JobsConfig',
     'images.apps.ImagesConfig',
+    'payments.apps.PaymentsConfig',
 ]
 
 MIDDLEWARE = [
