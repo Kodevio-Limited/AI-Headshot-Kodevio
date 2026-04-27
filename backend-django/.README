@@ -46,7 +46,7 @@ rakesh.kodevio@gmail.com
 123456
 
 
-pip install djangorestframework
+pip install djangorestframeworkg
 
 
 python run migrate
@@ -72,3 +72,18 @@ pip freeze > requirements.txt
 
 django> python --version             
 Python 3.10.11
+
+
+
+# New Environment Setup:
+
+py -3.10 -m venv myenv
+myenv\Scripts\activate
+
+
+
+ # Branching:
+
+ git branch feature/email
+ git switch feature/email
+ git push -u origin feature/email
