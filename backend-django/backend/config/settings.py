@@ -28,6 +28,19 @@ cloudinary.config(
     api_key=os.getenv("CLOUDINARY_API_KEY"),
     api_secret=os.getenv("CLOUDINARY_API_SECRET")
 )
+# feat: 10.0.1 - Email Config
+from decouple import config
+
+EMAIL_HOST = config("EMAIL_HOST")
+EMAIL_PORT = config("EMAIL_PORT", cast=int)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool)
+
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
