@@ -48,7 +48,7 @@ rakesh.kodevio@gmail.com
 
 pip install djangorestframeworkg
 
-
+python manage.py makemigrations
 python run migrate
 
 cd ai-Headshot-Kodevio/backend-django
