@@ -3,12 +3,11 @@
 import { useAppForm } from "@/components/form/form-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Bell, Shield, UserRound } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Bell, Shield, UserRound, Loader2 } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
+import { fetchProfile, updateProfile, updateSecurity, fetchNotificationSettings, updateNotificationSettings, UserProfile, NotificationSettings } from "@/lib/api/settings";
 
 type SettingsTab = "profile" | "security" | "notification";
-
-const profileImage = "https://www.figma.com/api/mcp/asset/60d1da0a-fae3-4799-9636-5998faafceeb";
 
 const settingsNav = [
     { key: "profile", label: "Profile", icon: UserRound },
@@ -43,9 +42,37 @@ function SettingsNav({ activeTab, onSelect }: { activeTab: SettingsTab; onSelect
 }
 
 function ProfilePanel() {
+    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [loading, setLoading] = useState(true);
+
     const form = useAppForm({
         defaultValues: { name: "", email: "" },
+        onSubmit: async ({ value }) => {
+            const updated = await updateProfile(value);
+            setProfile(updated);
+        }
     });
+
+    useEffect(() => {
+        let mounted = true;
+        fetchProfile().then(data => {
+            if (mounted) {
+                setProfile(data);
+                form.setFieldValue("name", data.name);
+                form.setFieldValue("email", data.email);
+                setLoading(false);
+            }
+        });
+        return () => { mounted = false; };
+    }, [form]);
+
+    if (loading || !profile) {
+        return (
+            <div className="flex h-60 w-full items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
 
     return (
         <section className="dashboard-card min-w-0 overflow-hidden">
@@ -56,13 +83,13 @@ function ProfilePanel() {
             <div className="space-y-6 p-6">
                 <div className="flex items-center gap-3">
                     <Avatar className="size-20">
-                        <AvatarImage src={profileImage} alt="Jane Cooper" />
-                        <AvatarFallback>JC</AvatarFallback>
+                        <AvatarImage src={profile.profileImage} alt={profile.name} />
+                        <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
                     </Avatar>
 
                     <div className="space-y-1">
-                        <p className="text-xl font-medium text-foreground">Jane Cooper</p>
-                        <p>jane@gmail.com</p>
+                        <p className="text-xl font-medium text-foreground">{profile.name}</p>
+                        <p>{profile.email}</p>
                     </div>
                 </div>
 
@@ -96,6 +123,10 @@ function ProfilePanel() {
 function SecurityPanel() {
     const form = useAppForm({
         defaultValues: { currentPassword: "", newPassword: "", confirmNewPassword: "" },
+        onSubmit: async ({ value }) => {
+            await updateSecurity(value);
+            form.reset();
+        }
     });
 
     return (
@@ -147,9 +178,34 @@ function NotificationToggle({ checked, onCheckedChange }: { checked: boolean; on
 }
 
 function NotificationPanel() {
-    const [newBackings, setNewBackings] = useState(true);
-    const [highFidelityPreviews, setHighFidelityPreviews] = useState(true);
-    const [autoSaveProjects, setAutoSaveProjects] = useState(true);
+    const [settings, setSettings] = useState<NotificationSettings | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let mounted = true;
+        fetchNotificationSettings().then(data => {
+            if (mounted) {
+                setSettings(data);
+                setLoading(false);
+            }
+        });
+        return () => { mounted = false; };
+    }, []);
+
+    const handleChange = async (key: keyof NotificationSettings, value: boolean) => {
+        if (!settings) return;
+        const newSettings = { ...settings, [key]: value };
+        setSettings(newSettings);
+        await updateNotificationSettings(newSettings);
+    };
+
+    if (loading || !settings) {
+        return (
+            <div className="flex h-60 w-full items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
 
     return (
         <section className="dashboard-card min-w-0 overflow-hidden">
@@ -163,7 +219,7 @@ function NotificationPanel() {
                         <p className="text-lg font-medium">New Backings</p>
                         <p className="text-sm text-muted-foreground">Get notified when we add new backings to the catalog</p>
                     </div>
-                    <NotificationToggle checked={newBackings} onCheckedChange={setNewBackings} />
+                    <NotificationToggle checked={settings.newBackings} onCheckedChange={(c) => handleChange("newBackings", c)} />
                 </div>
 
                 <div className="flex items-center justify-between gap-4">
@@ -171,7 +227,7 @@ function NotificationPanel() {
                         <p className="text-lg font-medium">High Fidelity Previews</p>
                         <p className="text-sm text-muted-foreground">Always load 4K textures in the backing viewer</p>
                     </div>
-                    <NotificationToggle checked={highFidelityPreviews} onCheckedChange={setHighFidelityPreviews} />
+                    <NotificationToggle checked={settings.highFidelityPreviews} onCheckedChange={(c) => handleChange("highFidelityPreviews", c)} />
                 </div>
 
                 <div className="flex items-center justify-between gap-4">
@@ -179,7 +235,7 @@ function NotificationPanel() {
                         <p className="text-lg font-medium">Auto-save Projects</p>
                         <p className="text-sm text-muted-foreground">Automatically save changes to your mood boards</p>
                     </div>
-                    <NotificationToggle checked={autoSaveProjects} onCheckedChange={setAutoSaveProjects} />
+                    <NotificationToggle checked={settings.autoSaveProjects} onCheckedChange={(c) => handleChange("autoSaveProjects", c)} />
                 </div>
             </div>
         </section>

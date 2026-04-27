@@ -3,6 +3,7 @@
 import { useAppForm } from "@/components/form/form-context";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
+import { resetPassword } from "@/lib/api/auth";
 
 const resetSchema = z
     .object({
@@ -21,7 +22,7 @@ export default function ResetPassword() {
         defaultValues: { password: "", confirmPassword: "" },
         validators: { onChange: resetSchema },
         onSubmit: async ({ value }) => {
-            console.log("Reset password:", value);
+            await resetPassword(value);
             router.push("/admin/signin");
         },
     });

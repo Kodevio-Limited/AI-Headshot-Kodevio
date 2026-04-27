@@ -1,25 +1,14 @@
-
-// Redirecting to Signin Page as its a Dashboard and we want to make sure only authenticated users can access it.
-
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { NativeSelect } from "@/components/ui/native-select";
-import { mockTraffic } from "@/lib/data/traffic";
+import { fetchDashboardStats, fetchPopularImages, fetchTrafficData } from "@/lib/api/dashboard";
 import { TrafficPoint } from "@/types/traffic";
-import { Eye, Image as ImageIcon, LayoutGrid, Users } from "lucide-react";
+import { Eye, Image as ImageIcon, LayoutGrid, Users, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Area, CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
-
-const popularImages = [
-    "https://www.figma.com/api/mcp/asset/27d85d2b-be0b-44ef-9ceb-7ba328753ed2",
-    "https://www.figma.com/api/mcp/asset/3c5107ee-dc9a-41a9-aec9-0c0ab9b0c8c0",
-    "https://www.figma.com/api/mcp/asset/513cba50-52d1-49ad-abb1-5a72f89022cd",
-    "https://www.figma.com/api/mcp/asset/95d70fd1-f7e5-4fe9-9086-6845b2d7e762",
-    "https://www.figma.com/api/mcp/asset/69351ca5-20bc-4aae-b3f8-50b109c3d266",
-];
 
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
     return (
@@ -37,9 +26,24 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string
 
 function TrafficChart() {
     const [year, setYear] = useState("2026");
-    const [data] = useState<TrafficPoint[]>(mockTraffic);
+    const [data, setData] = useState<TrafficPoint[]>([]);
+    const [loading, setLoading] = useState(true);
     const [hasSize, setHasSize] = useState(false);
     const chartContainerRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        let mounted = true;
+        const loadTraffic = async () => {
+            setLoading(true);
+            const fetchedData = await fetchTrafficData(year);
+            if (mounted) {
+                setData(fetchedData);
+                setLoading(false);
+            }
+        };
+        loadTraffic();
+        return () => { mounted = false; };
+    }, [year]);
 
     useEffect(() => {
         const element = chartContainerRef.current;
@@ -76,8 +80,14 @@ function TrafficChart() {
             </CardHeader>
 
             <CardContent className="px-6 pb-6 pt-6">
-                <div ref={chartContainerRef} className="h-82 w-full min-w-0">
-                    {hasSize ? (
+                <div ref={chartContainerRef} className="h-82 w-full min-w-0 relative">
+                    {loading ? (
+                        <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        </div>
+                    ) : null}
+
+                    {hasSize && data.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={data} margin={{ top: 8, right: 8, left: -14, bottom: 12 }}>
                                 <CartesianGrid stroke="#ececec" strokeDasharray="0" vertical={false} />
@@ -131,14 +141,49 @@ function PopularImageCard({ image, title, views }: { image: string; title: strin
 }
 
 export default function Dashboard() {
+    const [stats, setStats] = useState<{
+        totalViews: string;
+        mediaUploads: string;
+        activeUsers: string;
+        totalCategories: string;
+    } | null>(null);
+    const [images, setImages] = useState<string[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function loadData() {
+            try {
+                const [statsData, imagesData] = await Promise.all([
+                    fetchDashboardStats(),
+                    fetchPopularImages()
+                ]);
+                setStats(statsData);
+                setImages(imagesData);
+            } catch (err) {
+                console.error("Failed to load dashboard data", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadData();
+    }, []);
+
+    if (loading || !stats) {
+        return (
+            <div className="flex h-full w-full items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+
     return (
         <div className="w-full space-y-6 bg-background">
             {/* Top Stats */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
-                <StatCard icon={<Eye />} label="Total Views" value="100000" />
-                <StatCard icon={<ImageIcon />} label="Media Uploads" value="1600090" />
-                <StatCard icon={<Users />} label="Active Users" value="12000000" />
-                <StatCard icon={<LayoutGrid />} label="Total Categories" value="1200" />
+                <StatCard icon={<Eye />} label="Website View" value={stats.totalViews} />
+                <StatCard icon={<ImageIcon />} label="Media Uploads" value={stats.mediaUploads} />
+                <StatCard icon={<LayoutGrid />} label="Headshot Generated" value={stats.totalCategories} />
+                <StatCard icon={<Users />} label="Paid Users" value={stats.activeUsers} />
             </div>
 
             {/* Chart and Popular Images */}
@@ -156,7 +201,7 @@ export default function Dashboard() {
                     </CardHeader>
 
                     <CardContent className="space-y-4 px-6 pb-6 pt-6">
-                        {popularImages.map((image) => (
+                        {images.map((image) => (
                             <PopularImageCard key={image} image={image} title="Metropolitan Twilight Skyline" views="30k" />
                         ))}
                     </CardContent>

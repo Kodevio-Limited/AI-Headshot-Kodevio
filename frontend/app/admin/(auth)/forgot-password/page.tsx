@@ -3,6 +3,7 @@
 import { useAppForm } from "@/components/form/form-context";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
+import { forgotPassword } from "@/lib/api/auth";
 
 const forgotSchema = z.object({
     email: z.email("Enter your email address"),
@@ -15,7 +16,7 @@ export default function ForgotPassword() {
         defaultValues: { email: "" },
         validators: { onChange: forgotSchema },
         onSubmit: async ({ value }) => {
-            console.log("Forgot password:", value);
+            await forgotPassword(value);
             router.push("/admin/verification");
         },
     });

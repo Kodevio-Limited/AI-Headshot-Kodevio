@@ -30,7 +30,7 @@ export default function JobsDashboard() {
 
   const handleView = (job: Job) => setSelectedJob(job);
   const handleClose = () => setSelectedJob(null);
-  
+
   const handleRetry = async (jobId: string) => {
     try {
       const updatedJob = await retryJob(jobId);
