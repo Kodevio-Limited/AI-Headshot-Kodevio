@@ -2,6 +2,7 @@ import replicate
 import os
 
 client = replicate.Client(api_token=os.getenv("REPLICATE_API_TOKEN"))
+client.poll_interval = 5.0
 import logging
 logger = logging.getLogger(__name__)
 

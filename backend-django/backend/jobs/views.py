@@ -95,11 +95,8 @@ class UploadImageView(APIView):
         best_image = valid_images[0]
 
         job.best_image = best_image  # feat: v8.0.0 - Assigning best image to job
-        job.status = Job.Status.PROCESSING
+        job.status = Job.Status.PENDING # Status remains pending until payment is complete
         job.save()
-
-        # feat: v5.0.1 - Trigger asynchronous processing of the job using Celery.
-        process_job.delay(job.id)
 
         return Response({
             "status": "uploaded, processing started",
