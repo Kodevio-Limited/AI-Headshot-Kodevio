@@ -11,6 +11,10 @@ from services.email.email_service import send_results_email
 def process_job(job_id):
     job = Job.objects.get(id=job_id)
 
+    # Strict enforcement: Do not process if not paid
+    if job.payment_status != Job.PaymentStatus.PAID:
+        return
+
     job.status = "PROCESSING"
     job.save()
 

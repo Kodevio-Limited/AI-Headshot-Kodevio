@@ -31,8 +31,8 @@ class CreateCheckoutSessionView(APIView):
                 },
                 "quantity": 1,
             }],
-            success_url=f"{settings.FRONTEND_BASE_URL}/jobs/{job_id}",
-            cancel_url=f"{settings.FRONTEND_BASE_URL}/jobs/{job_id}",
+            success_url=f"{settings.FRONTEND_BASE_URL}/success",
+            cancel_url=f"{settings.FRONTEND_BASE_URL}/",
             metadata={
                 "job_id": str(job.id),
                 "email": job.email
