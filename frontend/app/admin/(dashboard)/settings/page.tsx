@@ -121,11 +121,31 @@ function ProfilePanel() {
 }
 
 function SecurityPanel() {
+    const [securityError, setSecurityError] = useState<string | null>(null);
+    const [securitySuccess, setSecuritySuccess] = useState(false);
+
     const form = useAppForm({
         defaultValues: { currentPassword: "", newPassword: "", confirmNewPassword: "" },
         onSubmit: async ({ value }) => {
-            await updateSecurity(value);
-            form.reset();
+            setSecurityError(null);
+            setSecuritySuccess(false);
+
+            if (value.newPassword !== value.confirmNewPassword) {
+                setSecurityError("New passwords do not match.");
+                return;
+            }
+
+            try {
+                // Map camelCase form fields → snake_case API contract
+                await updateSecurity({
+                    old_password: value.currentPassword,
+                    new_password: value.newPassword,
+                });
+                setSecuritySuccess(true);
+                form.reset();
+            } catch (err: unknown) {
+                setSecurityError(err instanceof Error ? err.message : "Failed to update password.");
+            }
         }
     });
 
@@ -142,6 +162,17 @@ function SecurityPanel() {
                     form.handleSubmit();
                 }}
             >
+                {securityError && (
+                    <div className="rounded-md bg-destructive/10 border border-destructive/30 px-4 py-3 text-sm text-destructive">
+                        {securityError}
+                    </div>
+                )}
+                {securitySuccess && (
+                    <div className="rounded-md bg-green-500/10 border border-green-500/30 px-4 py-3 text-sm text-green-700 dark:text-green-400">
+                        Password updated successfully.
+                    </div>
+                )}
+
                 <form.AppField name="currentPassword">
                     {(field) => <field.FormInput type="password" label="Current Password" placeholder="Enter current password" />}
                 </form.AppField>
@@ -160,6 +191,7 @@ function SecurityPanel() {
         </section>
     );
 }
+
 
 function NotificationToggle({ checked, onCheckedChange }: { checked: boolean; onCheckedChange: (checked: boolean) => void }) {
     return (

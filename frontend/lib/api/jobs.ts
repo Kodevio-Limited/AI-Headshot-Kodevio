@@ -1,46 +1,87 @@
 import { Job } from "@/types/job";
 
-// Mock data (would be replaced by actual fetch call to the backend)
-const mockJobs: Job[] = [
-  {
-    id: "job-001",
-    email: "alice@example.com",
-    status: "pending",
-    payment: "paid",
-    created: "2026-04-27 10:00:00",
-    inputImages: ["/assets/input1.jpg", "/assets/input2.jpg"],
-    selectedImage: "/assets/input1.jpg",
-    outputImage: "/assets/output1.jpg",
-    error: null,
-  },
-  {
-    id: "job-002",
-    email: "bob@example.com",
-    status: "failed",
-    payment: "unpaid",
-    created: "2026-04-27 09:30:00",
-    inputImages: ["/assets/input3.jpg"],
-    selectedImage: null,
-    outputImage: null,
-    error: "Processing error: invalid input format.",
-  },
-];
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export async function fetchJobs(): Promise<Job[]> {
-  // Simulate network request
-  return new Promise((resolve) => setTimeout(() => resolve([...mockJobs]), 500));
+
+  const response = await fetch(`${API_BASE_URL}/admin-api/jobs/`, {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.detail || "Failed to fetch jobs");
+  }
+
+  const data = await response.json();
+
+  return data.map((job: any) => ({
+    id: String(job.id),
+    email: job.email,
+    status: job.status.toLowerCase() as any,
+    payment: job.payment_status === "PAID" ? "paid" : "unpaid",
+    created: new Date(job.created_at).toLocaleString(),
+    inputImages: job.input_images || [],
+    selectedImage: job.selected_image || null,
+    outputImage: job.output_image || null,
+    error: job.error_message || null,
+  }));
 }
 
 export async function retryJob(jobId: string): Promise<Job> {
-  // Simulate network request
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const jobIndex = mockJobs.findIndex(j => j.id === jobId);
-      if (jobIndex === -1) return reject(new Error("Job not found"));
-      
-      const updatedJob: Job = { ...mockJobs[jobIndex], status: "pending", error: null };
-      mockJobs[jobIndex] = updatedJob;
-      resolve(updatedJob);
-    }, 500);
+  function getCookie(name: string): string {
+    if (typeof document === "undefined") return "";
+    const v = `; ${document.cookie}`;
+    const parts = v.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()!.split(";").shift() ?? "";
+    return "";
+  }
+
+  const response = await fetch(`${API_BASE_URL}/admin-api/jobs/${jobId}/retry/`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "X-CSRFToken": getCookie("csrftoken"),
+    },
   });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.detail || "Failed to retry job");
+  }
+
+  // Fetch the updated job details to return a full Job object
+  const detailResponse = await fetch(`${API_BASE_URL}/admin-api/jobs/${jobId}/`, {
+    credentials: "include",
+  });
+
+  if (!detailResponse.ok) {
+    const job = await response.json();
+    return {
+      id: String(job.id),
+      email: job.email,
+      status: job.status.toLowerCase() as any,
+      payment: job.payment_status === "PAID" ? "paid" : "unpaid",
+      created: new Date(job.created_at).toLocaleString(),
+      inputImages: [],
+      selectedImage: null,
+      outputImage: null,
+      error: null,
+    };
+  }
+
+  const detailData = await detailResponse.json();
+
+  return {
+    id: String(detailData.id),
+    email: detailData.email,
+    status: detailData.status.toLowerCase() as any,
+    payment: detailData.payment_status === "PAID" ? "paid" : "unpaid",
+    created: new Date(detailData.created_at).toLocaleString(),
+    inputImages: detailData.input_images || [],
+    selectedImage: detailData.selected_image || null,
+    outputImage: detailData.output_image || null,
+    error: detailData.error_message || null,
+  };
 }
+

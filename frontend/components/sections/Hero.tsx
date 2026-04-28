@@ -19,10 +19,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Upload, Shield, ArrowRight } from "lucide-react";
+import { Upload, Shield, ArrowRight, Loader2, CheckCircle2, AlertCircle, X } from "lucide-react";
 import { useState, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { createJob, uploadImages, createCheckoutSession } from "@/lib/api/generation";
 
 
 
@@ -32,11 +33,54 @@ export default function Hero() {
   const [isAnimating, setIsAnimating] = useState(false); // To trigger animation class
   const [images, setImages] = useState<string[]>([]); // Store uploaded image previews
   const fileInputRef = useRef<HTMLInputElement | null>(null); // Ref for hidden file input
+
+  // New State Variables for API flow
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [email, setEmail] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const handleCancelUpload = () => { // Reset state to cancel upload
     setImages([]);
+    setSuccessMessage(null);
+    setErrorMessage(null);
   }
-  const handleGenerateAIHeadshot = () => { // Placeholder for AI headshot generation logic
-    alert("AI headshot generation will be implemented in the backend phase.");
+  const handleGenerateAIHeadshot = () => { 
+    setShowEmailModal(true);
+  }
+
+  const submitJob = async () => {
+    if (!email) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+    
+    setIsGenerating(true);
+    setErrorMessage(null);
+
+    try {
+      // 1. Create Job
+      const { job_id } = await createJob(email);
+      
+      // 2. Upload Images
+      await uploadImages(job_id, images);
+
+      // 3. Create Checkout Session
+      // const { checkout_url } = await createCheckoutSession(job_id);
+
+      // 4. Redirect to Stripe Checkout
+      // window.location.href = checkout_url;
+
+      setSuccessMessage("Job successfully submitted! We've started processing your headshots.");
+      setShowEmailModal(false);
+      setIsGenerating(false);
+
+      
+    } catch (error: any) {
+      setErrorMessage(error.message || "An error occurred while processing your request.");
+      setIsGenerating(false);
+    }
   }
 
   //feat: v2.1.1 - Drag-and-drop handlers
@@ -185,8 +229,24 @@ export default function Hero() {
               aria-label="Upload your photo by clicking or dragging here"
               style={{ cursor: 'pointer' }}
             >
-              {/* Preview Grid */}
-              <div className="mb-8">
+              {successMessage ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20 text-green-500">
+                    <CheckCircle2 className="h-8 w-8" />
+                  </div>
+                  <h3 className="mb-2 text-2xl font-semibold text-foreground">You're all set!</h3>
+                  <p className="text-muted-foreground">{successMessage}</p>
+                  <Button 
+                    className="mt-8 bg-accent text-accent-foreground hover:bg-accent/90"
+                    onClick={() => setSuccessMessage(null)}
+                  >
+                    Create Another
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  {/* Preview Grid */}
+                  <div className="mb-8">
                 <div
                   className={
                     images.length > 3
@@ -271,6 +331,8 @@ export default function Hero() {
                   <span>Your photos are encrypted and never shared</span>
                 </div>
               </div>
+              </>
+              )}
             </div>
 
             {/* Floating Elements - Subtle */}
@@ -315,6 +377,57 @@ export default function Hero() {
           </div>
         </div>
       </div>
+
+      {/* Email Modal */}
+      {showEmailModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="relative w-full max-w-md rounded-2xl border bg-card p-8 shadow-lg">
+            <button 
+              onClick={() => setShowEmailModal(false)}
+              className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <h3 className="mb-2 text-2xl font-semibold tracking-tight">Where should we send your headshots?</h3>
+            <p className="mb-6 text-sm text-muted-foreground">
+              Enter your email address to receive your high-quality AI generated professional portraits.
+            </p>
+            
+            <div className="space-y-4">
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                disabled={isGenerating}
+              />
+              
+              {errorMessage && (
+                <div className="flex items-center gap-2 text-sm text-destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
+              <Button 
+                onClick={submitJob} 
+                disabled={isGenerating || !email}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Uploading & Processing...
+                  </>
+                ) : (
+                  "Generate My Headshots"
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

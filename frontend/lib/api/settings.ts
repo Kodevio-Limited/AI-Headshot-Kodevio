@@ -1,3 +1,5 @@
+import { changePassword } from "./auth";
+
 export interface UserProfile {
     name: string;
     email: string;
@@ -36,13 +38,9 @@ export async function updateProfile(data: Partial<UserProfile>): Promise<UserPro
     });
 }
 
-export async function updateSecurity(data: Record<string, string>): Promise<void> {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            console.log("Security updated:", data);
-            resolve();
-        }, 500);
-    });
+// Delegates to the real Django change-password endpoint
+export async function updateSecurity(data: { old_password: string; new_password: string }): Promise<void> {
+    await changePassword({ old_password: data.old_password, new_password: data.new_password });
 }
 
 export async function fetchNotificationSettings(): Promise<NotificationSettings> {
@@ -57,3 +55,4 @@ export async function updateNotificationSettings(data: Partial<NotificationSetti
         }, 500);
     });
 }
+

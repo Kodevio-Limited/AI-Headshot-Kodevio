@@ -20,12 +20,32 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-#  ======================================================================================================================
-#  = dev only Config ==================================================================================================
-CORS_ALLOW_ALL_ORIGINS = True  # dev only
+# ──────────────────────────────────────────────────────────────────────────
+# CORS / CSRF / Cookie settings (session auth with Next.js on :3000)
+# ──────────────────────────────────────────────────────────────────────────
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
 
+# CSRF must trust the Next.js origin so cross-origin POSTs work
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+]
 
-#  ======================================================================================================================
+# Lax is fine for same-site localhost; switch to None + Secure in production
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+# Must be False so JS (getCookie helper) can read it for X-CSRFToken header
+CSRF_COOKIE_HTTPONLY = False
+
+# DRF — use session auth so cookies are respected
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+}
+# ──────────────────────────────────────────────────────────────────────────
 
 import cloudinary
 
@@ -66,21 +86,14 @@ LOGGING = {
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-f94jq7s=c(hqqwm^4zg=_&vk7leoqplx9*2%2t--%o=@=l=%07'
+# Load from environment — never commit a real key to version control
+SECRET_KEY = config("DJANGO_SECRET_KEY", default='django-insecure-f94jq7s=c(hqqwm^4zg=_&vk7leoqplx9*2%2t--%o=@=l=%07')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*").split(",")
 
-# Enabling media handling
-import os
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# ADDING FRONTEND BASE
-from decouple import config
 FRONTEND_BASE_URL = config("FRONTEND_BASE_URL")
 STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY")
 STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")
@@ -100,14 +113,17 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'cloudinary',
-    
-    # These are the apps we created for our project
+
+    # Internal apps
+    'auth_app.apps.AuthAppConfig',
     'jobs.apps.JobsConfig',
     'images.apps.ImagesConfig',
     'payments.apps.PaymentsConfig',
 ]
 
 MIDDLEWARE = [
+    # CorsMiddleware MUST be first (before CommonMiddleware)
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -183,8 +199,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Celery Configuration Options
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = config("CELERY_BROKER_URL", default="redis://localhost:6379/0")
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'

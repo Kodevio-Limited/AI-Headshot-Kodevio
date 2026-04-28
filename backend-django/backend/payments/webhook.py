@@ -6,7 +6,11 @@ from jobs.tasks import process_job
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-# feat: v9.0.0 - This is
+from django.views.decorators.csrf import csrf_exempt
+
+# feat: v9.0.1 - This is the Stripe Webhook receiver. 
+# It must be CSRF exempt because requests come from external services.
+@csrf_exempt
 def stripe_webhook(request):
     payload = request.body
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")

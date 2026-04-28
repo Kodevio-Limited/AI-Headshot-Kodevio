@@ -122,19 +122,16 @@ function TrafficChart() {
     );
 }
 
-function PopularImageCard({ image, title, views }: { image: string; title: string; views: string }) {
+function RecentHeadshotCard({ image, name, role }: { image: string; name: string; role: string }) {
     return (
         <div className="flex items-center gap-3">
-            <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-[5px] bg-[#d9d9d9]">
-                <Image src={image} alt={title} fill unoptimized className="object-cover" />
+            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted border border-border/50">
+                <Image src={image} alt={name} fill unoptimized className="object-cover" />
             </div>
 
-            <div className="flex-1 space-y-1">
-                <p className="text-sm font-medium text-foreground">{title}</p>
-                <div className="flex items-center gap-1 text-foreground">
-                    <Eye className="size-3.5" />
-                    <span className="text-xs font-medium">{views}</span>
-                </div>
+            <div className="flex-1 space-y-0.5">
+                <p className="text-sm font-semibold text-foreground">{name}</p>
+                <p className="text-xs text-muted-foreground">{role}</p>
             </div>
         </div>
     );
@@ -147,18 +144,13 @@ export default function Dashboard() {
         activeUsers: string;
         totalCategories: string;
     } | null>(null);
-    const [images, setImages] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function loadData() {
             try {
-                const [statsData, imagesData] = await Promise.all([
-                    fetchDashboardStats(),
-                    fetchPopularImages()
-                ]);
+                const statsData = await fetchDashboardStats();
                 setStats(statsData);
-                setImages(imagesData);
             } catch (err) {
                 console.error("Failed to load dashboard data", err);
             } finally {
@@ -182,30 +174,49 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
                 <StatCard icon={<Eye />} label="Website View" value={stats.totalViews} />
                 <StatCard icon={<ImageIcon />} label="Media Uploads" value={stats.mediaUploads} />
-                <StatCard icon={<LayoutGrid />} label="Headshot Generated" value={stats.totalCategories} />
+                <StatCard icon={<LayoutGrid />} label="Headshots Generated" value={stats.totalCategories} />
                 <StatCard icon={<Users />} label="Paid Users" value={stats.activeUsers} />
             </div>
 
-            {/* Chart and Popular Images */}
+            {/* Chart and Recent Headshots */}
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)]">
                 {/* Traffic Charts here */}
                 <TrafficChart />
 
-                {/* Popular Images */}
+                {/* Recent Headshots */}
                 <Card className="rounded-[20px] border border-border bg-background shadow-[0px_12px_40px_-16px_rgba(0,0,0,0.2)]">
                     <CardHeader className="flex flex-row items-start justify-between gap-4 px-6 pb-0 pt-6">
-                        <h3 className="text-[24px] font-semibold leading-[1.2] text-foreground">Popular Images</h3>
-                        <Button variant="ghost" size="xs">
-                            View all
-                        </Button>
+                        <h3 className="text-[24px] font-semibold leading-[1.2] text-foreground">Recent Headshots</h3>
                     </CardHeader>
 
                     <CardContent className="space-y-4 px-6 pb-6 pt-6">
-                        {images.map((image) => (
-                            <PopularImageCard key={image} image={image} title="Metropolitan Twilight Skyline" views="30k" />
+                        {[
+                          {
+                            name: "Ada Lovelace",
+                            role: "Marketing Director",
+                            image: "/assets/comparison/Lovelace/after.png",
+                          },
+                          {
+                            name: "Michael Torres",
+                            role: "Software Engineer",
+                            image: "/assets/comparison/ben/monochrome.jpg",
+                          },
+                          {
+                            name: "Emily Watson",
+                            role: "Financial Analyst",
+                            image: "/assets/comparison/charlotte/monochrome.jpg",
+                          },
+                          {
+                            name: "James Park",
+                            role: "Product Manager",
+                            image: "/assets/comparison/victor/monochrome.jpg",
+                          },
+                        ].map((item) => (
+                            <RecentHeadshotCard key={item.name} image={item.image} name={item.name} role={item.role} />
                         ))}
                     </CardContent>
                 </Card>
+
             </div>
         </div>
     );
