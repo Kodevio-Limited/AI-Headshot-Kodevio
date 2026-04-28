@@ -1,6 +1,7 @@
 
 from django.urls import path 
-from .view import CreateCheckoutSessionView # This view creates the checkout session  
+from .views import CreateCheckoutSessionView # This view creates the checkout session  
+  
 
 
 # feat: v9.0.0 - This is the URL for the checkout session creation endpoint

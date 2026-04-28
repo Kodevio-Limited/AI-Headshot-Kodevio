@@ -19,9 +19,13 @@ class DeleteAllJobsView(APIView):
 
 class CreateJobView(APIView):
     def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        job = Job.objects.create()
-        return Response({"job_id": job.id})
+        job = Job.objects.create(email=email)
+        return Response({"job_id": job.id}, status=status.HTTP_201_CREATED)
+
 
 
 class UploadImageView(APIView):
@@ -32,8 +36,8 @@ class UploadImageView(APIView):
             return Response({"error": "Job not found"}, status=404)
 
         # feat: v8.0.0 - Stripe Payment Status check.
-        if job.payment_status != Job.PaymentStatus.PAID:
-            return Response({"error": "Payment not completed"}, status=400)
+        # if job.payment_status != Job.PaymentStatus.PAID:
+        #     return Response({"error": "Payment not completed"}, status=400)
 
         # Uploading image
         files = request.FILES.getlist('images')

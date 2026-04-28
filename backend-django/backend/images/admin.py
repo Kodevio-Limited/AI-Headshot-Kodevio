@@ -4,7 +4,6 @@ from django.contrib import admin
 from django.contrib import admin
 from .models import Image
 
-admin.site.register(Image)
 
 
 # feat: v11.0.0 - This is the admin interface for the Image model.
@@ -14,10 +13,13 @@ class ImageAdmin(admin.ModelAdmin):
         "id",
         "job",
         "type",
-        "score",
-        "url",
-        "created_at",
+        "file",
+        "generated_url",
+        #  "score",
+        # "url,
+        # "created_at",
     )
+
 
     list_filter = ("type",)
 
