@@ -11,10 +11,18 @@ from services.validator_instance import validator
 from jobs.tasks import process_job
 
 
+from rest_framework.permissions import IsAuthenticated
+
 class DeleteAllJobsView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def delete(self, request):
+        if not request.user.is_staff:
+            return Response({"error": "Admin access required."}, status=status.HTTP_403_FORBIDDEN)
+            
         Job.objects.all().delete()
         return Response({"status": "all jobs deleted"}, status=status.HTTP_204_NO_CONTENT)
+
 
 
 class CreateJobView(APIView):
@@ -95,8 +103,13 @@ class UploadImageView(APIView):
         best_image = valid_images[0]
 
         job.best_image = best_image  # feat: v8.0.0 - Assigning best image to job
-        job.status = Job.Status.PENDING # Status remains pending until payment is complete
+        # Temporarily bypass Stripe for testing
+        job.payment_status = Job.PaymentStatus.PAID
+        job.status = Job.Status.PENDING
         job.save()
+
+        process_job.delay(job.id)
+
 
         return Response({
             "status": "uploaded, processing started",

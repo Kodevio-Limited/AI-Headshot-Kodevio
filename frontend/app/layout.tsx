@@ -2,8 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import Header from "@/components/sections/Header";
-import Footer from "@/components/sections/Footer";
+import LayoutContent from "@/components/LayoutContent";
 import SiteBackground from "@/components/sections/SiteBackground";
 
 const inter = Inter({ 
@@ -34,9 +33,7 @@ export default function RootLayout({
       <body className="relative flex min-h-screen flex-col overflow-x-hidden font-sans">
         <SiteBackground />
         <div className="relative z-10 flex min-h-screen flex-col">
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <LayoutContent>{children}</LayoutContent>
         </div>
       </body>
     </html>

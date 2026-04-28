@@ -1,8 +1,9 @@
 // frontend/lib/api/generation.ts
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export async function createJob(email: string): Promise<{ job_id: number }> {
+
   const response = await fetch(`${API_BASE_URL}/jobs/create/`, {
     method: "POST",
     headers: {
@@ -36,11 +37,11 @@ function dataURLtoFile(dataurl: string, filename: string): File {
 
 export async function uploadImages(jobId: number, images: string[]): Promise<void> {
   const formData = new FormData();
-  
+
   images.forEach((imgBase64, index) => {
     // Generate a unique filename for each uploaded image
     const file = dataURLtoFile(imgBase64, `upload_${index}.jpg`);
-    formData.append("images", file); 
+    formData.append("images", file);
   });
 
   const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/upload/`, {

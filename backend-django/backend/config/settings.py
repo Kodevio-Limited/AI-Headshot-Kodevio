@@ -36,6 +36,8 @@ CSRF_TRUSTED_ORIGINS = [
 # Lax is fine for same-site localhost; switch to None + Secure in production
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
+# Must be False so JS (getCookie helper) can read it for X-CSRFToken header
+CSRF_COOKIE_HTTPONLY = False
 
 # DRF — use session auth so cookies are respected
 REST_FRAMEWORK = {
@@ -84,21 +86,14 @@ LOGGING = {
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-f94jq7s=c(hqqwm^4zg=_&vk7leoqplx9*2%2t--%o=@=l=%07'
+# Load from environment — never commit a real key to version control
+SECRET_KEY = config("DJANGO_SECRET_KEY", default='django-insecure-f94jq7s=c(hqqwm^4zg=_&vk7leoqplx9*2%2t--%o=@=l=%07')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
-# Enabling media handling
-import os
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# ADDING FRONTEND BASE
-from decouple import config
 FRONTEND_BASE_URL = config("FRONTEND_BASE_URL")
 STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY")
 STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")

@@ -94,3 +94,23 @@ export async function changePassword(data: ChangePasswordData): Promise<void> {
         throw new Error(body.error ?? "Failed to update password.");
     }
 }
+
+// ─── Forgot / Reset / OTP ─────────────────────────────────────────────────────
+// TODO: wire these to real backend endpoints when the email-OTP flow is built.
+// Currently stubs so the UI pages compile and can be navigated.
+
+export async function forgotPassword(data: { email: string }): Promise<void> {
+    // Placeholder — will POST to /auth/forgot-password/ once the endpoint exists
+    console.log("[forgotPassword] stub called with:", data);
+}
+
+export async function verifyOTP(code: string): Promise<void> {
+    // Placeholder — will POST to /auth/verify-otp/ once the endpoint exists
+    console.log("[verifyOTP] stub called with:", code);
+}
+
+export async function resetPassword(data: { password: string; confirmPassword: string }): Promise<void> {
+    // Placeholder — will POST to /auth/reset-password/ once the endpoint exists
+    console.log("[resetPassword] stub called with:", data);
+}
+

@@ -67,10 +67,15 @@ export default function Hero() {
       await uploadImages(job_id, images);
 
       // 3. Create Checkout Session
-      const { checkout_url } = await createCheckoutSession(job_id);
+      // const { checkout_url } = await createCheckoutSession(job_id);
 
       // 4. Redirect to Stripe Checkout
-      window.location.href = checkout_url;
+      // window.location.href = checkout_url;
+
+      setSuccessMessage("Job successfully submitted! We've started processing your headshots.");
+      setShowEmailModal(false);
+      setIsGenerating(false);
+
       
     } catch (error: any) {
       setErrorMessage(error.message || "An error occurred while processing your request.");

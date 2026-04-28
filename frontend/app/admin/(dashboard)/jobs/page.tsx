@@ -13,14 +13,17 @@ export default function JobsDashboard() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [jobList, setJobList] = useState<Job[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
     async function loadData() {
       try {
         const data = await fetchJobs();
         setJobList(data);
-      } catch (error) {
-        console.error("Failed to load jobs", error);
+      } catch (err) {
+        console.error("Failed to load jobs", err);
+        setError(err instanceof Error ? err.message : "Failed to load jobs");
       } finally {
         setLoading(false);
       }
@@ -40,15 +43,29 @@ export default function JobsDashboard() {
       if (selectedJob?.id === jobId) {
         setSelectedJob(updatedJob);
       }
-    } catch (error) {
-      console.error("Failed to retry job", error);
+    } catch (err) {
+      console.error("Failed to retry job", err);
     }
   };
+
+  const filteredJobs = jobList.filter((job) =>
+    job.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    job.id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (loading) {
     return (
       <div className="flex h-full w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center gap-4">
+        <p className="text-red-500 font-semibold">{error}</p>
+        <Button onClick={() => { setLoading(true); setError(null); fetchJobs().then(setJobList).catch(err => setError(err.message)).finally(() => setLoading(false)); }}>Retry</Button>
       </div>
     );
   }
@@ -62,13 +79,18 @@ export default function JobsDashboard() {
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
         <div className="relative w-full lg:w-116">
-          <Input type="search" placeholder="Search jobs..." />
+          <Input 
+            type="search" 
+            placeholder="Search jobs by ID or email..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
           <Search className="pointer-events-none absolute right-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
         </div>
       </div>
 
       <div className="space-y-3 md:hidden mb-6">
-        {jobList.map((job) => (
+        {filteredJobs.map((job) => (
           <article key={`mobile-${job.id}`} className="rounded-lg border border-border bg-card p-4 shadow-sm">
             <div className="space-y-1">
               <p className="text-xs font-medium text-muted-foreground">Job #{job.id}</p>
@@ -125,7 +147,7 @@ export default function JobsDashboard() {
               </tr>
             </thead>
             <tbody>
-              {jobList.map((job) => (
+              {filteredJobs.map((job) => (
                 <tr key={job.id} className="h-13">
                   <td className="border border-border px-2 text-sm leading-6 font-normal text-muted-foreground lg:text-[16px]">
                     {job.id}
@@ -168,7 +190,8 @@ export default function JobsDashboard() {
       </div>
 
       <div className="flex flex-col gap-4 text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-        <p className="px-2 text-sm leading-6 font-medium">Showing 1-{jobList.length} out of {jobList.length}</p>
+        <p className="px-2 text-sm leading-6 font-medium">Showing 1-{filteredJobs.length} out of {filteredJobs.length}</p>
+
 
         <div className="flex items-center gap-2.5 px-2 py-1 text-sm leading-6 font-medium lg:text-[16px]">
           <button type="button" className="cursor-pointer px-1 py-0.5">

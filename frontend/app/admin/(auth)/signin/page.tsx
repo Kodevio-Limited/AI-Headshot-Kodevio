@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
 import { signIn } from "@/lib/api/auth";
+import { Sparkles } from "lucide-react";
 
 const signinSchema = z.object({
     email: z.email("Enter your email address"),
@@ -33,56 +34,88 @@ export default function Signin() {
     });
 
     return (
-        <div className="my-20 mx-auto flex w-full max-w-150 flex-col gap-6 rounded-lg border px-6 py-12">
-            <h2 className="text-center text-2xl font-bold">Admin Sign In</h2>
-
-            {authError && (
-                <div className="rounded-md bg-destructive/10 border border-destructive/30 px-4 py-3 text-sm text-destructive">
-                    {authError}
+        <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-4 md:p-8">
+            <div className="w-full max-w-md rounded-3xl bg-white border border-white/10 bg-black/40 backdrop-blur-2xl p-8 shadow-2xl flex flex-col gap-6">
+                {/* Premium Logo Section */}
+                <div className="flex flex-col items-center gap-3 mb-2">
+                    <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[#3b82f6]">
+                        <Sparkles className="h-6 w-6 text-white" />
+                    </div>
+                    <h1 className="text-xl font-bold tracking-tight text-white">
+                        HeadshotAI <span className="text-[#3b82f6] font-medium text-base ml-1">Admin</span>
+                    </h1>
                 </div>
-            )}
 
-            <form
-                className="grid gap-6"
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    form.handleSubmit();
-                }}
-            >
-                <form.AppField name="email">
-                    {(field) => <field.FormInput type="email" label="Email" placeholder="Enter your email" />}
-                </form.AppField>
 
-                <form.AppField name="password">
-                    {(field) => <field.FormInput type="password" label="Password" placeholder="Enter your password" />}
-                </form.AppField>
+                <div className="flex flex-col gap-1 text-center">
+                    <h2 className="text-lg font-semibold text-white">Sign in to Dashboard</h2>
+                    <p className="text-sm text-white/60">Enter your admin credentials to access backend tools</p>
+                </div>
 
-                <div className="flex items-center justify-between">
-                    <form.AppField name="remember">
+                {authError && (
+                    <div className="rounded-xl bg-destructive/10 border border-destructive/30 px-4 py-3 text-sm text-destructive font-medium text-center">
+                        {authError}
+                    </div>
+                )}
+
+                <form
+                    className="grid gap-5"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        form.handleSubmit();
+                    }}
+                >
+                    <form.AppField name="email">
                         {(field) => (
-                            <div className="flex items-center gap-2">
-                                <Checkbox
-                                    id="remember"
-                                    checked={field.state.value}
-                                    onCheckedChange={(c) => field.handleChange(c === true)}
-                                />
-                                <label htmlFor="remember" className="text-sm text-muted-foreground">
-                                    Remember me
-                                </label>
-                            </div>
+                            <field.FormInput
+                                type="email"
+                                label="Email Address"
+                                placeholder="admin@example.com"
+                            />
                         )}
                     </form.AppField>
 
-                    <Link href="/admin/forgot-password" className="text-primary font-medium hover:underline">
-                        Forgot password?
-                    </Link>
-                </div>
+                    <form.AppField name="password">
+                        {(field) => (
+                            <field.FormInput
+                                type="password"
+                                label="Password"
+                                placeholder="••••••••"
+                            />
+                        )}
+                    </form.AppField>
 
-                <form.AppForm>
-                    <form.FormSubmit label="Sign In" />
-                </form.AppForm>
-            </form>
+                    <div className="flex items-center justify-between mt-1">
+                        <form.AppField name="remember">
+                            {(field) => (
+                                <div className="flex items-center gap-2">
+                                    <Checkbox
+                                        id="remember"
+                                        checked={field.state.value}
+                                        onCheckedChange={(c) => field.handleChange(c === true)}
+                                        className="border-white/20 data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground"
+                                    />
+                                    <label htmlFor="remember" className="text-sm font-medium text-white/60 cursor-pointer select-none">
+                                        Remember me
+                                    </label>
+                                </div>
+                            )}
+                        </form.AppField>
+
+                        <Link href="/admin/forgot-password" className="text-accent font-medium text-sm hover:underline transition-colors">
+                            Forgot password?
+                        </Link>
+                    </div>
+
+                    <form.AppForm>
+                        <form.FormSubmit
+                            label="Sign In"
+                        />
+                    </form.AppForm>
+                </form>
+            </div>
         </div>
     );
 }
+
 

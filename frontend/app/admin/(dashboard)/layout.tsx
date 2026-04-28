@@ -3,7 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { LayoutGrid, Menu, Settings, User, Briefcase, LogOut } from "lucide-react";
+import { LayoutGrid, Menu, Settings, User, Briefcase, LogOut, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -33,7 +33,7 @@ function SidebarNav() { // This component is used in both the mobile sheet and t
                         href={item.href}
                         className={cn(
                             "flex h-14 w-full max-w-56.25 items-center gap-2 rounded-[20px] px-4 text-[20px] font-medium leading-7 transition-colors",
-                            isActive ? "bg-[#333333] text-white" : "text-[#333333] hover:bg-[#f5f5f5]"
+                            isActive ? "bg-accent text-accent-foreground" : "text-foreground hover:bg-muted"
                         )}>
                         <Icon className="size-6" />
                         {item.label}
@@ -89,15 +89,27 @@ export default function DashboardLayout({ children }: Readonly<{ children: React
                                     }
                                 ></SheetTrigger>
                                 <SheetContent side="left" className="w-[calc(100vw-1rem)] max-w-72 p-0">
-                                    <div className="border-b px-4 py-5">
-                                        <Image src={logoImage} alt="Logo" width={52} height={52} unoptimized />
+                                    <div className="border-b px-4 py-5 flex items-center gap-2.5">
+                                        <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#3b82f6]">
+                                            <Sparkles className="h-5 w-5 text-white" />
+                                        </div>
+                                        <span className="text-base font-semibold tracking-tight text-foreground">
+                                            HeadshotAI
+                                        </span>
                                     </div>
                                     <SidebarNav />
                                 </SheetContent>
                             </Sheet>
                         </div>
 
-                        <Image src={logoImage} alt="Logo" width={52} height={52} unoptimized />
+                        <div className="flex items-center gap-2.5">
+                            <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#3b82f6]">
+                                <Sparkles className="h-5 w-5 text-white" />
+                            </div>
+                            <span className="text-base font-semibold tracking-tight text-foreground">
+                                HeadshotAI
+                            </span>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -105,7 +117,7 @@ export default function DashboardLayout({ children }: Readonly<{ children: React
                             <AvatarImage src={avatarImage} alt={user?.name ?? "Admin"} />
                             <AvatarFallback>{user?.name?.charAt(0).toUpperCase() ?? "A"}</AvatarFallback>
                         </Avatar>
-                        <span className="text-[20px] font-semibold leading-normal text-[#333333]">
+                        <span className="text-[20px] font-semibold leading-normal text-foreground">
                             {user?.name ?? "Admin"}
                         </span>
 
@@ -134,4 +146,4 @@ export default function DashboardLayout({ children }: Readonly<{ children: React
             </div>
         </div>
     );
-}
+}
