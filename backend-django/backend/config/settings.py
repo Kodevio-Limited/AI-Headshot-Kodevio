@@ -82,6 +82,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # ADDING FRONTEND BASE
 from decouple import config
 FRONTEND_BASE_URL = config("FRONTEND_BASE_URL")
+STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY")
+STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")
+
 
 # Application definition
 
