@@ -20,6 +20,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+#  ======================================================================================================================
+#  = dev only Config ==================================================================================================
+CORS_ALLOW_ALL_ORIGINS = True  # dev only
+
+
+#  ======================================================================================================================
 
 import cloudinary
 
@@ -28,6 +34,33 @@ cloudinary.config(
     api_key=os.getenv("CLOUDINARY_API_KEY"),
     api_secret=os.getenv("CLOUDINARY_API_SECRET")
 )
+# feat: 10.0.1 - Email Config
+from decouple import config
+
+EMAIL_HOST = config("EMAIL_HOST")
+EMAIL_PORT = config("EMAIL_PORT", cast=int)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool)
+
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+# feat: v11.0.0 - Adding Logging for admin dashboard.
+LOGGING = {
+    "version": 1,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+}
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -46,6 +79,10 @@ import os
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# ADDING FRONTEND BASE
+from decouple import config
+FRONTEND_BASE_URL = config("FRONTEND_BASE_URL")
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -55,10 +92,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # External Apps
+    'corsheaders',
+    'rest_framework',
+    'cloudinary',
     
     # These are the apps we created for our project
     'jobs.apps.JobsConfig',
     'images.apps.ImagesConfig',
+    'payments.apps.PaymentsConfig',
 ]
 
 MIDDLEWARE = [

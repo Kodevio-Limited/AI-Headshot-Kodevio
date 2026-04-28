@@ -1,3 +1,11 @@
 {
-    "python-envs.defaultEnvManager": "ms-python.python:system"
+    //  "python-envs.defaultEnvManager": "ms-python.python:system" 
+    //  For Windows System Python Interpreter using this so that the errors dont pop up anymore
+    "python.defaultInterpreterPath": "${workspaceFolder}/backend-django/myenv/Scripts/python.exe",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/backend-django/backend"
+    ],
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingImports": "information"
+    }
 }
