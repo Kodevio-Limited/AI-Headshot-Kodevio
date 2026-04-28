@@ -126,7 +126,7 @@ class JobStatusView(APIView):
                 img.file.url for img in input_images if img.file
             ],
             "output_images": [
-                img.url for img in output_images if img.url
+                img.generated_url for img in output_images if img.generated_url
             ],
             "best_image": job.best_image.file.url if job.best_image else None,
             "error": job.error_message

@@ -4,6 +4,7 @@
 from celery import shared_task
 from jobs.models import Job
 from services.pipeline import run_pipeline
+from services.email.email_service import send_results_email
 
 
 @shared_task
@@ -14,12 +15,16 @@ def process_job(job_id):
     job.save()
 
     try:
-        # What we have done here is, have Single source of truth
         run_pipeline(job)
         job.status = "COMPLETED"
+        job.save()
+
+        # feat: v11.0.2 - Hook up Email
+        output_images = job.images.filter(type="OUTPUT")
+        urls = [img.generated_url for img in output_images if img.generated_url]
+        send_results_email(job.email, urls)
 
     except Exception as e:
         job.status = "FAILED"
         job.error_message = str(e)
-
-    job.save()
+        job.save()
