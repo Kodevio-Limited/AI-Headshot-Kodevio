@@ -7,6 +7,7 @@ from services.analysis.face_analyzer import normalize_analysis
 from services.generation.prompt_builder import build_prompt
 from services.generation.generator import generate_headshot
 from services.storage.cloudinary_service import upload_to_cloudinary
+from services.download.download import download_image
 
 def process_image(image_path):
     # 1. Analyze
@@ -38,21 +39,39 @@ def process_image(image_path):
 
 # feat: v5.0.1 - Added Run pipeline function to orchestrate the entire process for a given job. This function retrieves all input images associated with the job, processes each image through the existing pipeline (validation, analysis, generation), and saves the generated output back to the database. This modular approach allows for better separation of concerns and makes it easier to manage the processing flow for each job.
 def run_pipeline(job):
-    input_images = job.images.filter(type="INPUT")
+    if not job.best_image:
+        raise Exception("No best image selected for this job")
 
-    if not input_images.exists():
-        raise Exception("No input images found")
-
-    for image in input_images:
+    image = job.best_image
+    
+    try:
         result = process_image(image.file.path)
 
         if "error" in result:
-            raise Exception(result["error"])
+            raise Exception(f"Best image processing failed: {result['error']}")
 
-        # Save output
-        Image.objects.create(
+        output_url = result["output"]
+
+        # 1. Download generated image
+        image_file = download_image(output_url)
+
+        # 2. Save to local media folder via Image model
+        # We create the empty record in the database marking it as an OUTPUT image for the target job.
+        output_image_obj = Image.objects.create(
             job=job,
-            generated_url=result["output"],
             type="OUTPUT"
-        )    
+        )
+        # This is standard Django logic. We pass the raw memory bytes (image_file).
+        output_image_obj.file.save(f"output_{job.id}_{image.id}.png", image_file)
+
+        # 3. Upload to Cloudinary
+        # We grab the physical file location on the server using .file.path and send a standard payload request over to the official Cloudinary image server buckets.
+        cloudinary_url = upload_to_cloudinary(output_image_obj.file.path)
+        output_image_obj.generated_url = cloudinary_url
+        output_image_obj.save() # We commit the changes safely back inside your local database schemas.
+
+    except Exception as e:
+        raise Exception(f"Pipeline execution failed for best image. Error: {str(e)}")
+
+
     
