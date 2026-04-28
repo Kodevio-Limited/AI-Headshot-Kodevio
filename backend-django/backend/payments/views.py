@@ -4,8 +4,8 @@ import stripe
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.conf import settings
+from jobs.models import Job
 
-from django.conf import settings
 
 # Create your views here.
 stripe.api_key = settings.STRIPE_SECRET_KEY
