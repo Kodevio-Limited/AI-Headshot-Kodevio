@@ -1,0 +1,11 @@
+myenv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.git
+.dockerignore
+Dockerfile
+db.sqlite3
+media
+images

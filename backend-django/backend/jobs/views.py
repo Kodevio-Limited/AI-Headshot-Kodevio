@@ -7,7 +7,7 @@ from services.score.scoring import score_image  # feat: v8.0.0 - Importing Score
 from .models import Job
 from images.models import Image
 
-from services.validator_instance import validator
+from services.validator_instance import get_validator
 from jobs.tasks import process_job
 
 
@@ -68,7 +68,7 @@ class UploadImageView(APIView):
             )
 
             # feat: v8.1.1 - Validation using MediaPipe
-            valid, msg, face_info = validator.validate(img.file.path)
+            valid, msg, face_info = get_validator().validate(img.file.path)
 
             if not valid:
                 rejected_images.append({
