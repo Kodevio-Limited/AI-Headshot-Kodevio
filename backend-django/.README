@@ -37,7 +37,9 @@ Remaining Dependencies:
 
 pip install tf-keras
 
-
+Username: admin
+Password: admin12345
+Email: admin@example.com
 
 python manage.py createsuperuser
 
