@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: always
+
+  backend:
+    build:
+      context: ./backend-django
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend-django/backend/.env
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - ALLOWED_HOSTS=*
+    volumes:
+      - ./backend-django/backend/db.sqlite3:/app/db.sqlite3
+      - ./backend-django/backend/media:/app/media
+      - deepface_weights:/root/.deepface/weights
+    depends_on:
+      - redis
+    restart: always
+
+  celery:
+    build:
+      context: ./backend-django
+    command: celery -A config worker -l info
+    env_file:
+      - ./backend-django/backend/.env
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - ALLOWED_HOSTS=*
+    volumes:
+      - ./backend-django/backend/db.sqlite3:/app/db.sqlite3
+      - ./backend-django/backend/media:/app/media
+      - deepface_weights:/root/.deepface/weights
+    depends_on:
+      - redis
+      - backend
+    restart: always
+
+  redis:
+    image: redis:alpine
+    # Removed external port mapping to prevent collision with local Redis
+    restart: always
+
+volumes:
+  deepface_weights:

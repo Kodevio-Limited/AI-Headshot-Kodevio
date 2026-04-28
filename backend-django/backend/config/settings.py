@@ -90,9 +90,9 @@ LOGGING = {
 SECRET_KEY = config("DJANGO_SECRET_KEY", default='django-insecure-f94jq7s=c(hqqwm^4zg=_&vk7leoqplx9*2%2t--%o=@=l=%07')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*").split(",")
 
 FRONTEND_BASE_URL = config("FRONTEND_BASE_URL")
 STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY")
@@ -199,8 +199,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Celery Configuration Options
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = config("CELERY_BROKER_URL", default="redis://localhost:6379/0")
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
