@@ -20,12 +20,30 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-#  ======================================================================================================================
-#  = dev only Config ==================================================================================================
-CORS_ALLOW_ALL_ORIGINS = True  # dev only
+# ──────────────────────────────────────────────────────────────────────────
+# CORS / CSRF / Cookie settings (session auth with Next.js on :3000)
+# ──────────────────────────────────────────────────────────────────────────
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
 
+# CSRF must trust the Next.js origin so cross-origin POSTs work
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+]
 
-#  ======================================================================================================================
+# Lax is fine for same-site localhost; switch to None + Secure in production
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+
+# DRF — use session auth so cookies are respected
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+}
+# ──────────────────────────────────────────────────────────────────────────
 
 import cloudinary
 
@@ -100,20 +118,21 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'cloudinary',
-    
-    # These are the apps we created for our project
+
+    # Internal apps
+    'auth_app.apps.AuthAppConfig',
     'jobs.apps.JobsConfig',
     'images.apps.ImagesConfig',
     'payments.apps.PaymentsConfig',
 ]
 
 MIDDLEWARE = [
+    # CorsMiddleware MUST be first (before CommonMiddleware)
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',

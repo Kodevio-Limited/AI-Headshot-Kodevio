@@ -28,6 +28,12 @@ urlpatterns = [
     path('jobs/', include('jobs.urls')),
     path('payments/', include("payments.urls")), # All payment endpoints except webhook
     path("payments/webhook/", stripe_webhook), # Stripe Webhook
+
+    # Auth: CSRF, login, logout, change-password, session-check
+    path("auth/", include("auth_app.urls")),
+
+    # Admin API: protected endpoints for the Next.js admin dashboard
+    path("admin-api/", include("jobs.urls_admin")),
 ]
 
 #* This line is REQUIRED for serving uploaded images in development
