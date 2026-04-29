@@ -12,6 +12,7 @@ class Analytics(models.Model):
 class Job(models.Model):
     class Status(models.TextChoices):
         PENDING = "PENDING"
+        IMAGES_UPLOADED = "IMAGES_UPLOADED" # feat: v15.0.1 - New intermediate state to ensure we only process jobs that have uploaded images.
         PROCESSING = "PROCESSING"
         COMPLETED = "COMPLETED"
         FAILED = "FAILED"
