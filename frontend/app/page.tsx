@@ -5,10 +5,12 @@ import Testimonials from "@/components/sections/Testimonials";
 import Pricing from "@/components/sections/Pricing";
 import TrustCTA from "@/components/sections/TrustCTA";
 import BeforeAfterSlider from "../components/sections/BeforeAfterSlider";
+import TrackView from "@/components/analytics/TrackView";
 
 export default function Home() {
   return (
     <>
+      <TrackView />
       <Hero />
       <BeforeAfterSlider />
       <TransformationGallery />

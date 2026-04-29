@@ -15,6 +15,8 @@ export default function JobsDashboard() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     async function loadData() {
@@ -30,6 +32,10 @@ export default function JobsDashboard() {
     }
     loadData();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const handleView = (job: Job) => setSelectedJob(job);
   const handleClose = () => setSelectedJob(null);
@@ -51,6 +57,12 @@ export default function JobsDashboard() {
   const filteredJobs = jobList.filter((job) =>
     job.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
     job.id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
+  const currentJobs = filteredJobs.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
   if (loading) {
@@ -90,7 +102,7 @@ export default function JobsDashboard() {
       </div>
 
       <div className="space-y-3 md:hidden mb-6">
-        {filteredJobs.map((job) => (
+        {currentJobs.map((job) => (
           <article key={`mobile-${job.id}`} className="rounded-lg border border-border bg-card p-4 shadow-sm">
             <div className="space-y-1">
               <p className="text-xs font-medium text-muted-foreground">Job #{job.id}</p>
@@ -147,7 +159,7 @@ export default function JobsDashboard() {
               </tr>
             </thead>
             <tbody>
-              {filteredJobs.map((job) => (
+              {currentJobs.map((job) => (
                 <tr key={job.id} className="h-13">
                   <td className="border border-border px-2 text-sm leading-6 font-normal text-muted-foreground lg:text-[16px]">
                     {job.id}
@@ -190,17 +202,36 @@ export default function JobsDashboard() {
       </div>
 
       <div className="flex flex-col gap-4 text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-        <p className="px-2 text-sm leading-6 font-medium">Showing 1-{filteredJobs.length} out of {filteredJobs.length}</p>
-
+        <p className="px-2 text-sm leading-6 font-medium">
+          Showing {filteredJobs.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}-
+          {Math.min(currentPage * itemsPerPage, filteredJobs.length)} out of {filteredJobs.length}
+        </p>
 
         <div className="flex items-center gap-2.5 px-2 py-1 text-sm leading-6 font-medium lg:text-[16px]">
-          <button type="button" className="cursor-pointer px-1 py-0.5">
+          <button 
+            type="button" 
+            className={`px-1 py-0.5 ${currentPage === 1 ? 'text-muted-foreground cursor-not-allowed' : 'cursor-pointer'}`}
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
             Previous
           </button>
-          <button type="button" className="h-6 w-6 bg-primary px-1 py-0.5 text-primary-foreground">
-            1
-          </button>
-          <button type="button" className="cursor-pointer px-1 py-0.5">
+          {Array.from({ length: Math.max(1, totalPages) }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              type="button"
+              className={`h-6 min-w-6 px-1 py-0.5 ${page === currentPage ? 'bg-primary text-primary-foreground' : 'cursor-pointer text-muted-foreground hover:text-foreground'}`}
+              onClick={() => setCurrentPage(page)}
+            >
+              {page}
+            </button>
+          ))}
+          <button 
+            type="button" 
+            className={`px-1 py-0.5 ${currentPage === Math.max(1, totalPages) ? 'text-muted-foreground cursor-not-allowed' : 'cursor-pointer'}`}
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.max(1, totalPages)))}
+            disabled={currentPage === Math.max(1, totalPages)}
+          >
             Next
           </button>
         </div>

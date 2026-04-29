@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import Job
+from .models import Job, Analytics
 from images.models import Image
 from jobs.tasks import process_job
 
@@ -123,4 +123,24 @@ class AdminJobRetryView(APIView):
             "created_at": job.created_at,
         })
 
-
+
+class AdminDashboardStatsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if not request.user.is_staff:
+            return Response({"error": "Admin access required."}, status=403)
+
+        views_obj, _ = Analytics.objects.get_or_create(key="website_views")
+        real_uploads = Image.objects.filter(type="INPUT").count()
+        real_generated = Image.objects.filter(type="OUTPUT").count()
+        real_paid_users = Job.objects.filter(payment_status="PAID").values("email").distinct().count()
+
+        return Response({
+            "totalViews": str(views_obj.value),
+            "mediaUploads": str(real_uploads),
+            "totalCategories": str(real_generated),
+            "activeUsers": str(real_paid_users)
+        })
+
+

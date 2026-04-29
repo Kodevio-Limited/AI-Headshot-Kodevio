@@ -141,3 +141,12 @@ class JobStatusView(APIView):
             "best_image": job.best_image.file.url if job.best_image else None,
             "error": job.error_message
         })
+
+
+class TrackView(APIView):
+    def post(self, request):
+        from .models import Analytics
+        views_obj, _ = Analytics.objects.get_or_create(key="website_views")
+        views_obj.value += 1
+        views_obj.save()
+        return Response({"status": "tracked", "views": views_obj.value})

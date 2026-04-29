@@ -115,7 +115,7 @@ def analyze_face(image_path, include_embedding=False):
                 enforce_detection=True,
                 align=True
             )
-            if faces:
+            if len(faces) == 1:
                 used_backend = backend
                 break
         except ValueError:

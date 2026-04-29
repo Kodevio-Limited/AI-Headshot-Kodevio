@@ -1,5 +1,7 @@
 import { TrafficPoint } from "@/types/traffic";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 const mockTraffic: TrafficPoint[] = [
   { month: "Jan", value: 1100 },
   { month: "Feb", value: 1200 },
@@ -40,5 +42,14 @@ export async function fetchPopularImages(): Promise<string[]> {
 }
 
 export async function fetchDashboardStats(): Promise<typeof mockStats> {
-  return new Promise((resolve) => setTimeout(() => resolve({ ...mockStats }), 400));
+  const response = await fetch(`${API_BASE_URL}/admin-api/stats/`, {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.detail || "Failed to fetch stats");
+  }
+
+  return response.json();
 }

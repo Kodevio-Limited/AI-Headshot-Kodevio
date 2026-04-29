@@ -37,5 +37,6 @@ def build_prompt(data):
 
     return {
         "prompt": positive,
-        "negative_prompt": negative
+        "negative_prompt": negative,
+        "gender": gender_text
     }
