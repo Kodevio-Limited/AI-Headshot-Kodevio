@@ -1,7 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import Job, Analytics
+from .models import Job
+from analytics.models import Analytics
 from images.models import Image
 from jobs.tasks import process_job
 
@@ -40,7 +41,7 @@ class AdminJobListView(APIView):
             data.append({
                 "id": job.id,
                 "email": job.email,
-                "payment_status": job.payment_status,
+                "payment_status": "PAID" if job.has_paid() else "PENDING",
                 "status": job.status,
                 "created_at": job.created_at,
                 "input_images": input_images,
@@ -85,7 +86,7 @@ class AdminJobDetailView(APIView):
         return Response({
             "id": job.id,
             "email": job.email,
-            "payment_status": job.payment_status,
+            "payment_status": "PAID" if job.has_paid() else "PENDING",
             "status": job.status,
             "created_at": job.created_at,
             "input_images": input_images,
@@ -118,7 +119,7 @@ class AdminJobRetryView(APIView):
         return Response({
             "id": job.id,
             "email": job.email,
-            "payment_status": job.payment_status,
+            "payment_status": "PAID" if job.has_paid() else "PENDING",
             "status": job.status,
             "created_at": job.created_at,
         })
@@ -134,7 +135,7 @@ class AdminDashboardStatsView(APIView):
         views_obj, _ = Analytics.objects.get_or_create(key="website_views")
         real_uploads = Image.objects.filter(type="INPUT").count()
         real_generated = Image.objects.filter(type="OUTPUT").count()
-        real_paid_users = Job.objects.filter(payment_status="PAID").values("email").distinct().count()
+        real_paid_users = Job.objects.filter(payments__status="SUCCESS").values("email").distinct().count()
 
         return Response({
             "totalViews": str(views_obj.value),

@@ -48,7 +48,7 @@ export default function Hero() {
     setSuccessMessage(null);
     setErrorMessage(null);
   }
-  const handleGenerateAIHeadshot = () => { 
+  const handleGenerateAIHeadshot = () => {
     setShowEmailModal(true);
   }
 
@@ -57,22 +57,24 @@ export default function Hero() {
       setErrorMessage("Please enter a valid email address.");
       return;
     }
-    
+
     setIsGenerating(true);
     setErrorMessage(null);
 
     try {
       // 1. Create Job
       const { job_id } = await createJob(email);
-      
+
       // 2. Upload Images
       await uploadImages(job_id, images);
+      //   // 3. Create Checkout Session
+      // const { checkout_url } = await createCheckoutSession(job_id);
 
-      // 3. Create Checkout Session
-      const { checkout_url } = await createCheckoutSession(job_id);
+      // // 4. Redirect to Stripe Checkout (page navigates away — no code runs after this)
+      // window.location.href = checkout_url;
 
-      // 4. Redirect to Stripe Checkout (page navigates away — no code runs after this)
-      window.location.href = checkout_url;
+      // 3. Skip Stripe Checkout and redirect directly to success
+      window.location.href = `/success?job_id=${job_id}`;
 
     } catch (error: any) {
       setErrorMessage(error.message || "An error occurred while processing your request.");
@@ -233,7 +235,7 @@ export default function Hero() {
                   </div>
                   <h3 className="mb-2 text-2xl font-semibold text-foreground">You're all set!</h3>
                   <p className="text-muted-foreground">{successMessage}</p>
-                  <Button 
+                  <Button
                     className="mt-8 bg-accent text-accent-foreground hover:bg-accent/90"
                     onClick={() => setSuccessMessage(null)}
                   >
@@ -244,91 +246,91 @@ export default function Hero() {
                 <>
                   {/* Preview Grid */}
                   <div className="mb-8">
-                <div
-                  className={
-                    images.length > 3
-                      ? "flex gap-3 overflow-x-auto scrollbar-thin scrollbar-thumb-accent/40 scrollbar-track-transparent"
-                      : "grid grid-cols-3 gap-3"
-                  }
-                  style={{ WebkitOverflowScrolling: 'touch' }}
-                >
-                  {images.length > 0
-                    ? images.map((img, idx) => (
-                      <div
-                        key={idx}
-                        className="aspect-square overflow-hidden rounded-xl bg-muted shrink-0"
-                        style={images.length > 3 ? { minWidth: 90, width: 90, maxWidth: 120 } : {}}
+                    <div
+                      className={
+                        images.length > 3
+                          ? "flex gap-3 overflow-x-auto scrollbar-thin scrollbar-thumb-accent/40 scrollbar-track-transparent"
+                          : "grid grid-cols-3 gap-3"
+                      }
+                      style={{ WebkitOverflowScrolling: 'touch' }}
+                    >
+                      {images.length > 0
+                        ? images.map((img, idx) => (
+                          <div
+                            key={idx}
+                            className="aspect-square overflow-hidden rounded-xl bg-muted shrink-0"
+                            style={images.length > 3 ? { minWidth: 90, width: 90, maxWidth: 120 } : {}}
+                          >
+                            <Image src={img} alt={`Uploaded ${idx + 1}`} width={200} height={200} className="h-full w-full object-cover" />
+                          </div>
+                        ))
+                        : [1, 2, 3].map((i) => (
+                          <div key={i} className="aspect-square overflow-hidden rounded-xl bg-muted">
+                            <Image src={`/dummy-image-square.jpg`} alt={`Headshot style ${i}`} width={200} height={200} className="h-full w-full object-cover" />
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+
+                  {/* Upload Area */}
+                  <div className="text-center select-none" >
+                    <div className="" onClick={handleUploadClick}>
+                      <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 transition-all ${isDragging ? "scale-110 bg-primary/20" : ""}`} >
+                        <Upload className={`h-6 w-6 transition-colors ${isDragging ? "text-primary" : "text-accent"}`} />
+                      </div>
+                      <h3 className="mt-4 text-lg font-semibold text-foreground">
+                        Upload Your Photo
+                      </h3>
+                      <p className={`mt-1 text-sm transition-colors ${isDragging ? "text-primary" : "text-muted-foreground"}`}>
+                        {isDragging ? "Drop image(s) here" : "Drag and drop or click to upload"}
+                      </p>
+
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleFileInputChange}
+                      />
+
+                    </div>
+
+                    {/* feat: v2.1.1 - Conditional, if one or more images are uploaded then select photo is replaced by two buttons "Cancel" and "Generate AI Headshot" */}
+                    {images.length > 0 ? (
+                      <div className="mt-6 flex items-center justify-between gap-4">
+                        <Button
+                          size="lg"
+                          className="flex-1 bg-destructive text-destructive-foreground font-medium hover:bg-destructive/90"
+                          onClick={handleCancelUpload}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          size="lg"
+                          className="flex-1 bg-primary text-primary-foreground font-medium hover:bg-primary/90"
+                          onClick={handleGenerateAIHeadshot}
+                        >
+                          Generate AI Headshot
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        size="lg"
+                        className="mt-6 w-full bg-accent text-accent-foreground font-medium hover:bg-accent/90"
+                        onClick={handleUploadClick}
                       >
-                        <Image src={img} alt={`Uploaded ${idx + 1}`} width={200} height={200} className="h-full w-full object-cover" />
-                      </div>
-                    ))
-                    : [1, 2, 3].map((i) => (
-                      <div key={i} className="aspect-square overflow-hidden rounded-xl bg-muted">
-                        <Image src={`/dummy-image-square.jpg`} alt={`Headshot style ${i}`} width={200} height={200} className="h-full w-full object-cover" />
-                      </div>
-                    ))}
-                </div>
-              </div>
+                        <Upload className="mr-2 h-4 w-4" />
+                        Select Photo
+                      </Button>
+                    )}
 
-              {/* Upload Area */}
-              <div className="text-center select-none" >
-                <div className="" onClick={handleUploadClick}>
-                  <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 transition-all ${isDragging ? "scale-110 bg-primary/20" : ""}`} >
-                    <Upload className={`h-6 w-6 transition-colors ${isDragging ? "text-primary" : "text-accent"}`} />
+                    <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                      <Shield className="h-3.5 w-3.5" />
+                      <span>Your photos are encrypted and never shared</span>
+                    </div>
                   </div>
-                  <h3 className="mt-4 text-lg font-semibold text-foreground">
-                    Upload Your Photo
-                  </h3>
-                  <p className={`mt-1 text-sm transition-colors ${isDragging ? "text-primary" : "text-muted-foreground"}`}>
-                    {isDragging ? "Drop image(s) here" : "Drag and drop or click to upload"}
-                  </p>
-
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    ref={fileInputRef}
-                    style={{ display: 'none' }}
-                    onChange={handleFileInputChange}
-                  />
-
-                </div>
-
-                {/* feat: v2.1.1 - Conditional, if one or more images are uploaded then select photo is replaced by two buttons "Cancel" and "Generate AI Headshot" */}
-                {images.length > 0 ? (
-                  <div className="mt-6 flex items-center justify-between gap-4">
-                    <Button
-                      size="lg"
-                      className="flex-1 bg-destructive text-destructive-foreground font-medium hover:bg-destructive/90"
-                      onClick={handleCancelUpload}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      size="lg"
-                      className="flex-1 bg-primary text-primary-foreground font-medium hover:bg-primary/90"
-                      onClick={handleGenerateAIHeadshot}
-                    >
-                      Generate AI Headshot
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    size="lg"
-                    className="mt-6 w-full bg-accent text-accent-foreground font-medium hover:bg-accent/90"
-                    onClick={handleUploadClick}
-                  >
-                    <Upload className="mr-2 h-4 w-4" />
-                    Select Photo
-                  </Button>
-                )}
-
-                <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-                  <Shield className="h-3.5 w-3.5" />
-                  <span>Your photos are encrypted and never shared</span>
-                </div>
-              </div>
-              </>
+                </>
               )}
             </div>
 
@@ -379,7 +381,7 @@ export default function Hero() {
       {showEmailModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
           <div className="relative w-full max-w-md rounded-2xl border bg-card p-8 shadow-lg">
-            <button 
+            <button
               onClick={() => setShowEmailModal(false)}
               className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"
             >
@@ -389,7 +391,7 @@ export default function Hero() {
             <p className="mb-6 text-sm text-muted-foreground">
               Enter your email address to receive your high-quality AI generated professional portraits.
             </p>
-            
+
             <div className="space-y-4">
               <input
                 type="email"
@@ -399,7 +401,7 @@ export default function Hero() {
                 className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 disabled={isGenerating}
               />
-              
+
               {errorMessage && (
                 <div className="flex items-center gap-2 text-sm text-destructive">
                   <AlertCircle className="h-4 w-4" />
@@ -407,8 +409,8 @@ export default function Hero() {
                 </div>
               )}
 
-              <Button 
-                onClick={submitJob} 
+              <Button
+                onClick={submitJob}
                 disabled={isGenerating || !email}
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
               >

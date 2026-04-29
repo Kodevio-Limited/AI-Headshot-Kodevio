@@ -27,8 +27,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('jobs/', include('jobs.urls')),
     path('payments/', include("payments.urls")), # All payment endpoints except webhook
-    path("payments/webhook/", stripe_webhook), # Stripe Webhook
     path("payments/webhook", stripe_webhook), # Stripe Webhook without trailing slash
+    
 
     # Auth: CSRF, login, logout, change-password, session-check
     path("auth/", include("auth_app.urls")),

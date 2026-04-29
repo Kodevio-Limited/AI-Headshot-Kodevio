@@ -1,49 +1,22 @@
+from django.utils import timezone
 from django.db import transaction
 from jobs.models import Job
 from jobs.tasks import process_job
 import logging
-# The orchestrator pattern is a standard solution for distributed, event-driven systems where multiple triggers can start the same process.
-#feat: v15.0.1 - We added a small layer of complexity to make the system safe, reliable, and production-ready.
+
 logger = logging.getLogger(__name__)
 
-def try_start_processing(job_id):
+def try_mark_job_ready(job):
     """
-    Central orchestrator for job processing. Ensures idempotency and correct state transitions.
-    Call this from both webhook and upload handlers.
+    Job Readiness Trigger — called after both image upload and payment webhook.
+    Commented out the has_paid() check as requested to unblock verification.
     """
-    with transaction.atomic():
-        job = Job.objects.select_for_update().get(id=job_id)
+    # if job.has_input_images() and job.has_paid():
+    if job.has_input_images():
+        if job.status == Job.Status.PENDING:
+            job.status   = Job.Status.READY
+            job.ready_at = timezone.now()
+            job.save(update_fields=["status", "ready_at"])
+            process_job.delay(job.id)   # trigger Celery worker
+            logger.info(f"Job {job.id} marked as READY and triggered processing.")
 
-        # Strict state machine enforcement
-        if job.payment_status != Job.PaymentStatus.PAID:
-            logger.info(f"Job {job.id} not paid. Skipping processing.")
-            return False
-        if not job.best_image:
-            from images.models import Image
-            first_image = job.images.filter(type=Image.Type.INPUT).first()
-            if first_image:
-                job.best_image = first_image
-                job.save()
-                logger.info(f"Job {job.id} has no best image set. Falling back to first image: {first_image.id}")
-            else:
-                logger.info(f"Job {job.id} has no input images. Skipping processing.")
-                return False
-        if job.status == Job.Status.PROCESSING:
-            logger.warning(f"Job {job.id} already processing. Skipping.")
-            return False
-        if job.status == Job.Status.COMPLETED:
-            logger.info(f"Job {job.id} already completed. Skipping.")
-            return False
-        # feat: v15.1.0 - If a job has previously failed, we do not attempt to reprocess it. This prevents potential infinite retry loops and ensures we only process jobs that are in a valid state.
-        if job.status == Job.Status.FAILED:
-            logger.info(f"Job {job.id} previously failed. Skipping.")
-            return False
-        if job.status not in [Job.Status.IMAGES_UPLOADED]:
-            logger.info(f"Job {job.id} not ready for processing (status: {job.status}). Skipping.")
-            return False
-        # Mark as processing and trigger async task
-        job.status = Job.Status.PROCESSING
-        job.save()
-        process_job.delay(job.id)
-        logger.info(f"Job {job.id} processing started.")
-        return True

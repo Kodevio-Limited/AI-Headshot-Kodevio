@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from jobs.models import Job
-from jobs.orchestrator import try_start_processing
+from jobs.orchestrator import try_mark_job_ready
 from payments.models import StripeEvent
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -37,7 +37,13 @@ def _stripe_webhook_impl(request):
         logger.info("Duplicate event ignored: %s", event_id)
         return HttpResponse(status=200)
 
-    # --- STEP 3: Handle only relevant event ---
+    # --- STEP 3: Record event ---
+    stripe_event = StripeEvent.objects.create(
+        event_id=event_id,
+        event_type=event["type"]
+    )
+
+    # --- STEP 4: Handle only relevant event ---
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
 
@@ -45,22 +51,19 @@ def _stripe_webhook_impl(request):
         logger.info("DEBUG metadata: %s", session.get("metadata"))
         logger.info("DEBUG payment_status: %s", session.get("payment_status"))
 
-
         metadata = session.get("metadata", {})
         job_id = metadata.get("job_id")
         email = metadata.get("email")
 
         if not job_id:
             logger.error("Missing job_id in metadata")
-            StripeEvent.objects.create(event_id=event_id)
             return HttpResponse(status=200)
 
-        # --- STEP 4: Fetch Job ---
+        # --- STEP 5: Fetch Job ---
         try:
             job = Job.objects.get(id=job_id)
         except Job.DoesNotExist:
             logger.error("Job not found: %s", job_id)
-            StripeEvent.objects.create(event_id=event_id)
             return HttpResponse(status=200)
         except Exception as e:
             logger.exception("DB error fetching job %s: %s", job_id, e)
@@ -74,34 +77,43 @@ def _stripe_webhook_impl(request):
                 email
             )
 
-        # 🧠 Prevent duplicate updates
-        if job.payment_status == Job.PaymentStatus.PAID:
-            logger.info("Job already marked PAID, skipping update")
-            StripeEvent.objects.create(event_id=event_id)
-            return HttpResponse(status=200)
-
-        # --- STEP 5: Update Job (CRITICAL) ---
+        # --- STEP 6: Update Payment (CRITICAL) ---
         try:
-            job.payment_status = Job.PaymentStatus.PAID
-            job.stripe_payment_id = session.get("id")
-            job.save()
-            logger.info("Job %s marked as PAID", job.id)
+            from payments.models import Payment
+            payment, created = Payment.objects.get_or_create(
+                provider="stripe",
+                provider_payment_id=session.get("id"),
+                defaults={
+                    "job": job,
+                    "amount": session.get("amount_total", 500),
+                    "status": Payment.Status.PENDING
+                }
+            )
+            
+            if payment.status == Payment.Status.SUCCESS:
+                logger.info("Payment already marked SUCCESS, skipping update")
+                return HttpResponse(status=200)
+
+            payment.status = Payment.Status.SUCCESS
+            payment.save(update_fields=["status"])
+            logger.info("Payment %s marked as SUCCESS", payment.id)
+
+            stripe_event.payment = payment
+            stripe_event.save(update_fields=["payment"])
+
         except Exception as e:
-            logger.exception("Failed to update job %s: %s", job.id, e)
+            logger.exception("Failed to update payment for job %s: %s", job.id, e)
             return HttpResponse(status=200)  # never retry endlessly
 
-        # --- STEP 6: Trigger processing (NON-CRITICAL) ---
+        # --- STEP 7: Trigger processing (NON-CRITICAL) ---
         try:
-            try_start_processing(job.id)
+            try_mark_job_ready(job)
             logger.info("Processing triggered for job %s", job.id)
         except Exception as e:
             logger.exception("Processing trigger failed for job %s: %s", job.id, e)
 
     else:
         logger.info("Unhandled event type: %s", event["type"])
-
-    # --- STEP 7: Record event AFTER handling ---
-    StripeEvent.objects.create(event_id=event_id)
 
     return HttpResponse(status=200)
 

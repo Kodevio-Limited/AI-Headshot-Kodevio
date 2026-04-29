@@ -4,7 +4,7 @@ SKIN_TONE_MAP = {
     "very_light": "fair skin",
     "light":      "light skin",
     "medium":     "medium skin tone",
-    "tan":        "olive skin tone",
+    "tan":        "tan skin tone",
     "dark":       "dark skin tone",
     "very_dark":  "deep dark skin tone",
     "unknown":    "natural skin tone"

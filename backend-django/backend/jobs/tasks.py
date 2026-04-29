@@ -72,8 +72,8 @@ def validate_and_score_images(job_id):
         logger.info(f"[VALIDATE] Best image for job {job.id}: {best_image.file.name}")
         
         # Trigger orchestrator to check if payment is also done and start processing
-        from jobs.orchestrator import try_start_processing
-        try_start_processing(job.id)
+        from jobs.orchestrator import try_mark_job_ready
+        try_mark_job_ready(job)
 
 
 @shared_task(
@@ -101,9 +101,9 @@ def process_job(self, job_id):
         if job.status in [Job.Status.COMPLETED]:
             logger.info(f"[PROCESS] Job {job.id} already completed. Skipping.")
             return
-        if job.payment_status != Job.PaymentStatus.PAID:
-            logger.info(f"[PROCESS] Job {job.id} not paid. Skipping.")
-            return
+        #  if job.payment_status != Job.PaymentStatus.PAID:
+        #     logger.info(f"[PROCESS] Job {job.id} not paid. Skipping.")
+        #     return
 
         job.status = Job.Status.PROCESSING
         job.save()

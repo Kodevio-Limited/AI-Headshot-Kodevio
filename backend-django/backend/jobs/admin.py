@@ -10,14 +10,12 @@ class JobAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "email",
-        "payment_status",
         "status",
-        "stripe_payment_id",
         "created_at",
     )
 
-    list_filter = ("payment_status", "status")
+    list_filter = ("status",)
 
-    search_fields = ("email", "stripe_payment_id")
+    search_fields = ("email",)
 
     readonly_fields = ("created_at", "updated_at")

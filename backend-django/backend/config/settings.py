@@ -121,6 +121,7 @@ INSTALLED_APPS = [
     'jobs.apps.JobsConfig',
     'images.apps.ImagesConfig',
     'payments.apps.PaymentsConfig',
+    'analytics.apps.AnalyticsConfig',
 ]
 
 MIDDLEWARE = [

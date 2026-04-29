@@ -39,4 +39,13 @@ class CreateCheckoutSessionView(APIView):
             }
         )
 
+        from payments.models import Payment
+        Payment.objects.create(
+            job=job,
+            provider="stripe",
+            provider_payment_id=session.id,
+            amount=500,
+            status=Payment.Status.PENDING
+        )
+
         return Response({"checkout_url": session.url})

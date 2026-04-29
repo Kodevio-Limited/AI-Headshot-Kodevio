@@ -49,7 +49,7 @@ export function FormImage({ label, disabled, accept = "image/png,image/jpeg,imag
                 </div>
 
                 <p className="text-sm font-medium text-gray-900">Click to upload image</p>
-                <p className="mt-1 text-xs text-gray-500">PNG, JPG or WEBP (max. 5MB)</p>
+                <p className="mt-1 text-xs text-gray-500">PNG, JPG or WEBP (max. 10MB)</p>
             </button>
 
             {field.state.value && <p className="mt-2 text-sm text-gray-600">Selected: {field.state.value.name}</p>}

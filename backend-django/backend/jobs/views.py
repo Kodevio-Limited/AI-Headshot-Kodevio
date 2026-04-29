@@ -10,7 +10,7 @@ from images.models import Image
 from services.validator_instance import get_validator
 
 from jobs.tasks import process_job
-from jobs.orchestrator import try_start_processing
+from jobs.orchestrator import try_mark_job_ready
 
 
 from rest_framework.permissions import IsAuthenticated
@@ -60,11 +60,11 @@ class UploadImageView(APIView):
         if len(files) > 5:
             return Response({"error": "Max 5 images allowed"}, status=400)
 
-        # feat: v15.1.0 - File size validation (max 5MB per image)
-        max_size = 5 * 1024 * 1024  # 5MB
+        # feat: v15.1.0 - File size validation (max 10MB per image)
+        max_size = 10 * 1024 * 1024  # 10MB
         for f in files:
             if f.size > max_size:
-                return Response({"error": f"File '{f.name}' exceeds 5MB size limit."}, status=400)
+                return Response({"error": f"File '{f.name}' exceeds 10MB size limit."}, status=400)
 
 
         # Save images only, validation/scoring will be async
@@ -75,10 +75,6 @@ class UploadImageView(APIView):
                 type=Image.Type.INPUT
             )
 
-
-        # Mark state as IMAGES_UPLOADED after successful upload
-        job.status = Job.Status.IMAGES_UPLOADED
-        job.save()
 
         # Trigger async validation/scoring
         from jobs.tasks import validate_and_score_images
@@ -111,7 +107,7 @@ class JobStatusView(APIView):
         return Response({
             "id": job.id,
             "status": job.status,
-            "payment_status": job.payment_status,
+            "payment_status": "PAID", # feat: v16.0.0 - Hardcoded for non-blocking Stripe testing
             "input_images": [
                 img.file.url for img in input_images if img.file
             ],
@@ -125,7 +121,7 @@ class JobStatusView(APIView):
 
 class TrackView(APIView):
     def post(self, request):
-        from .models import Analytics
+        from analytics.models import Analytics
         from django.db.models import F
         
         # Issue here, If multiple requests happened at the same time, they could read the same value, increment, and overwrite each other—causing lost updates.
