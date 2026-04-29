@@ -94,3 +94,20 @@ myenv\Scripts\activate
 rakesh
 rakesh.kodevio@gmail.com
 Random@123
+
+
+winget install stripe.stripe-cli
+stripe login
+stripe listen --forward-to localhost:8000/payments/webhook/
+npx skills add -y https://docs.stripe.com
+Kodevio Limited with account id acct_1TQnnZQUkz1DZ9TK
+
+
+
+Here are the test card credentials you can use on the Stripe checkout screen:
+
+Card Number: 4242 4242 4242 4242
+Expiration Date: Any future date (for example: 12/28 or 05/30)
+CVC / Security Code: Any 3-digit number (for example: 123)
+Name on Card: Anything you like (e.g., John Doe)
+ZIP / Postal Code: Anything valid (e.g., 90210)

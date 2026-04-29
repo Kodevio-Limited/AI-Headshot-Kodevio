@@ -20,7 +20,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Upload, Shield, ArrowRight, Loader2, CheckCircle2, AlertCircle, X } from "lucide-react";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { createJob, uploadImages, createCheckoutSession } from "@/lib/api/generation";
@@ -40,6 +40,16 @@ export default function Hero() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Detect ?payment=success redirect from Stripe and show success message
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("payment") === "success") {
+      setSuccessMessage("Payment successful! We've started generating your professional headshots. Check your email shortly.");
+      // Clean the URL without reloading the page
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
 
   const handleCancelUpload = () => { // Reset state to cancel upload
     setImages([]);
@@ -67,16 +77,11 @@ export default function Hero() {
       await uploadImages(job_id, images);
 
       // 3. Create Checkout Session
-      // const { checkout_url } = await createCheckoutSession(job_id);
+      const { checkout_url } = await createCheckoutSession(job_id);
 
-      // 4. Redirect to Stripe Checkout
-      // window.location.href = checkout_url;
+      // 4. Redirect to Stripe Checkout (page navigates away — no code runs after this)
+      window.location.href = checkout_url;
 
-      setSuccessMessage("Job successfully submitted! We've started processing your headshots.");
-      setShowEmailModal(false);
-      setIsGenerating(false);
-
-      
     } catch (error: any) {
       setErrorMessage(error.message || "An error occurred while processing your request.");
       setIsGenerating(false);

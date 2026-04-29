@@ -103,12 +103,9 @@ class UploadImageView(APIView):
         best_image = valid_images[0]
 
         job.best_image = best_image  # feat: v8.0.0 - Assigning best image to job
-        # Temporarily bypass Stripe for testing
-        job.payment_status = Job.PaymentStatus.PAID
-        job.status = Job.Status.PENDING
+        
+        # Save job details. Processing will be triggered via Stripe Webhook after payment.
         job.save()
-
-        process_job.delay(job.id)
 
 
         return Response({
