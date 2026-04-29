@@ -111,6 +111,7 @@ class JobStatusView(APIView):
         return Response({
             "id": job.id,
             "status": job.status,
+            "payment_status": job.payment_status,
             "input_images": [
                 img.file.url for img in input_images if img.file
             ],

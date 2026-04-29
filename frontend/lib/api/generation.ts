@@ -68,3 +68,15 @@ export async function createCheckoutSession(jobId: number): Promise<{ checkout_u
   return response.json();
 }
 
+export async function getJobStatus(jobId: number): Promise<{ id: number, status: string, payment_status: string }> {
+  const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/`, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || "Failed to fetch job status");
+  }
+
+  return response.json();
+}

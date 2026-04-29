@@ -41,15 +41,7 @@ export default function Hero() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Detect ?payment=success redirect from Stripe and show success message
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("payment") === "success") {
-      setSuccessMessage("Payment successful! We've started generating your professional headshots. Check your email shortly.");
-      // Clean the URL without reloading the page
-      window.history.replaceState({}, "", window.location.pathname);
-    }
-  }, []);
+  // Removed premature success message handling as success flow is now handled by /success page
 
   const handleCancelUpload = () => { // Reset state to cancel upload
     setImages([]);

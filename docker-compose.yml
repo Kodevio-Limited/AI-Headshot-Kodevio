@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   frontend:
@@ -15,6 +14,7 @@ services:
   backend:
     build:
       context: ./backend-django
+    command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
     env_file:
@@ -23,6 +23,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - ALLOWED_HOSTS=*
     volumes:
+      - ./backend-django/backend:/app
       - ./backend-django/backend/db.sqlite3:/app/db.sqlite3
       - ./backend-django/backend/media:/app/media
       - deepface_weights:/root/.deepface/weights
@@ -40,6 +41,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - ALLOWED_HOSTS=*
     volumes:
+      - ./backend-django/backend:/app
       - ./backend-django/backend/db.sqlite3:/app/db.sqlite3
       - ./backend-django/backend/media:/app/media
       - deepface_weights:/root/.deepface/weights

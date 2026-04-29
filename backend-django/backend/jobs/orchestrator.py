@@ -19,8 +19,15 @@ def try_start_processing(job_id):
             logger.info(f"Job {job.id} not paid. Skipping processing.")
             return False
         if not job.best_image:
-            logger.info(f"Job {job.id} has no best image. Skipping processing.")
-            return False
+            from images.models import Image
+            first_image = job.images.filter(type=Image.Type.INPUT).first()
+            if first_image:
+                job.best_image = first_image
+                job.save()
+                logger.info(f"Job {job.id} has no best image set. Falling back to first image: {first_image.id}")
+            else:
+                logger.info(f"Job {job.id} has no input images. Skipping processing.")
+                return False
         if job.status == Job.Status.PROCESSING:
             logger.warning(f"Job {job.id} already processing. Skipping.")
             return False

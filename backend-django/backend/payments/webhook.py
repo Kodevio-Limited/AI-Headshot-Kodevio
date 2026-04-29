@@ -2,76 +2,113 @@ import stripe
 import logging
 from django.conf import settings
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+
 from jobs.models import Job
-from jobs.tasks import process_job
 from jobs.orchestrator import try_start_processing
 from payments.models import StripeEvent
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
-
-from django.views.decorators.csrf import csrf_exempt
-
 logger = logging.getLogger(__name__)
 
-# feat: v9.0.1 - This is the Stripe Webhook receiver. 
-# It must be CSRF exempt because requests come from external services.
-@csrf_exempt
-def stripe_webhook(request):
+def _stripe_webhook_impl(request):
     payload = request.body
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
 
-    logger.info("Webhook received. Signature header present: %s", bool(sig_header))
-
+    # --- STEP 1: Verify signature (STRICT) ---
     try:
         event = stripe.Webhook.construct_event(
-            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+            payload,
+            sig_header,
+            settings.STRIPE_WEBHOOK_SECRET
         )
-        logger.info("Webhook signature verified. Event type: %s", event["type"])
-    except Exception as e:
-        logger.error("Webhook signature verification FAILED: %s", str(e))
+    except ValueError as e:
+        logger.error("Invalid payload: %s", str(e))
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        logger.error("Invalid signature: %s", str(e))
         return HttpResponse(status=400)
 
-    # PAYMENT SUCCESS
-    if event["type"] == "checkout.session.completed":
-        event_id = event["id"]
-        # Stripe idempotency: ignore duplicate events
-        if StripeEvent.objects.filter(event_id=event_id).exists():
-            logger.info(f"Duplicate Stripe event {event_id} ignored.")
-            return HttpResponse(status=200)
-        StripeEvent.objects.create(event_id=event_id)
+    logger.info("Stripe event received: %s", event["type"])
 
+    # --- STEP 2: Idempotency check ---
+    event_id = event["id"]
+    if StripeEvent.objects.filter(event_id=event_id).exists():
+        logger.info("Duplicate event ignored: %s", event_id)
+        return HttpResponse(status=200)
+
+    # --- STEP 3: Handle only relevant event ---
+    if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
 
-        # feat: v15.1.0 -  Strick payment status check. We only proceed if payment_status is 'paid'. This ensures we don't accidentally process unpaid sessions.
-        job_id = session["metadata"].get("job_id")
-        email = session["metadata"].get("email")
-        payment_status = session.get("payment_status")
-        logger.info("Payment completed for job_id: %s, email: %s, payment_status: %s", job_id, email, payment_status)
+        # 🔍 Debug logs (keep for now)
+        logger.info("DEBUG metadata: %s", session.get("metadata"))
+        logger.info("DEBUG payment_status: %s", session.get("payment_status"))
 
-        # Strictly require payment_status == 'paid'
-        if payment_status != "paid":
-            logger.warning(f"Stripe session for job {job_id} is not paid (status: {payment_status}). Ignoring event.")
+
+        metadata = session.get("metadata", {})
+        job_id = metadata.get("job_id")
+        email = metadata.get("email")
+
+        if not job_id:
+            logger.error("Missing job_id in metadata")
+            StripeEvent.objects.create(event_id=event_id)
             return HttpResponse(status=200)
 
+        # --- STEP 4: Fetch Job ---
         try:
             job = Job.objects.get(id=job_id)
         except Job.DoesNotExist:
-            logger.error("Job not found for job_id: %s", job_id)
-            return HttpResponse(status=404)
+            logger.error("Job not found: %s", job_id)
+            StripeEvent.objects.create(event_id=event_id)
+            return HttpResponse(status=200)
+        except Exception as e:
+            logger.exception("DB error fetching job %s: %s", job_id, e)
+            return HttpResponse(status=500)
 
-        # Log both emails for traceability, but do not enforce match
+        # Optional: log email mismatch (non-blocking)
         if email and job.email != email:
-            logger.info(f"Email mismatch allowed for job {job_id}: job.email={job.email}, session.email={email}")
+            logger.info(
+                "Email mismatch allowed: job.email=%s, stripe.email=%s",
+                job.email,
+                email
+            )
 
-        # feat: v8.0.0 - Changing the payment status to paid
-        job.payment_status = Job.PaymentStatus.PAID
-        job.stripe_payment_id = session["id"]
-        job.save()
-        logger.info("Job %s marked as PAID. Checking if processing can start...", job.id)
+        # 🧠 Prevent duplicate updates
+        if job.payment_status == Job.PaymentStatus.PAID:
+            logger.info("Job already marked PAID, skipping update")
+            StripeEvent.objects.create(event_id=event_id)
+            return HttpResponse(status=200)
 
-        # Use orchestrator to safely trigger processing if possible
-        try_start_processing(job.id)
+        # --- STEP 5: Update Job (CRITICAL) ---
+        try:
+            job.payment_status = Job.PaymentStatus.PAID
+            job.stripe_payment_id = session.get("id")
+            job.save()
+            logger.info("Job %s marked as PAID", job.id)
+        except Exception as e:
+            logger.exception("Failed to update job %s: %s", job.id, e)
+            return HttpResponse(status=200)  # never retry endlessly
+
+        # --- STEP 6: Trigger processing (NON-CRITICAL) ---
+        try:
+            try_start_processing(job.id)
+            logger.info("Processing triggered for job %s", job.id)
+        except Exception as e:
+            logger.exception("Processing trigger failed for job %s: %s", job.id, e)
+
     else:
-        logger.info("Unhandled event type: %s - ignoring.", event["type"])
+        logger.info("Unhandled event type: %s", event["type"])
+
+    # --- STEP 7: Record event AFTER handling ---
+    StripeEvent.objects.create(event_id=event_id)
 
     return HttpResponse(status=200)
+
+@csrf_exempt
+def stripe_webhook(request):
+    try:
+        return _stripe_webhook_impl(request)
+    except Exception as e:
+        logger.exception("🔥 GLOBAL WEBHOOK CRASH: %s", e)
+        return HttpResponse(status=200)
