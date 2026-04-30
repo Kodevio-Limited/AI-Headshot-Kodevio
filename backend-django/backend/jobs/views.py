@@ -86,14 +86,6 @@ class UploadImageView(APIView):
         })
 
 
-        return Response({
-            "status": "uploaded, processing started",
-            "uploaded_count": len(valid_images),
-            "rejected": rejected_images,
-            "best_image_id": best_image.id
-        })
-
-
 class JobStatusView(APIView):
     def get(self, request, job_id):
         try:
