@@ -8,28 +8,29 @@ logger = logging.getLogger(__name__)
 
 def try_mark_job_ready(job):
     """
-    Job Readiness Trigger — called after both image scoring and payment webhook.
-    """
-    # ✅ STRICT GATE: Require the scoring task to finish (best_image is set) AND payment to be complete
-    has_best = job.best_image is not None
-    is_paid = job.has_paid()
+    Job Readiness Trigger — called after both image scoring and the payment webhook.
     
-    logger.info(
-        "Checking readiness for Job %s: BestImage=%s, Paid=%s, CurrentStatus=%s",
-        job.id, has_best, is_paid, job.status
-    )
-
-    if has_best and is_paid:
+    This acts as the final gatekeeper before expensive AI generation begins.
+    It guarantees that we have both a valid scored image AND a successful payment.
+    """
+    # STRICT GATE: Require the scoring task to finish (best_image is set) AND payment to be complete
+    if job.best_image is not None and job.has_paid():
+        
+        # Only trigger if the job hasn't already been marked as READY or PROCESSING
         if job.status == Job.Status.PENDING:
-            job.status   = Job.Status.READY
+            
+            # 1. Update the database state
+            job.status = Job.Status.READY
             job.ready_at = timezone.now()
             job.save(update_fields=["status", "ready_at"])
             
-            # Defer the Celery trigger until the DB transaction is fully committed
+            # 2. Trigger the Celery worker SAFELY
+            # Using transaction.on_commit ensures the worker doesn't try to fetch 
+            # the job from the database before the READY status is actually saved.
             transaction.on_commit(lambda: process_job.delay(job.id))
             
-            logger.info("✅ Job %s marked as READY and triggered generation processing.", job.id)
+            logger.info(f"Job {job.id} marked as READY and triggered generation processing.")
         else:
-            logger.info("Job %s is already %s, skipping trigger.", job.id, job.status)
+            logger.info(f"Job {job.id} is already past PENDING status (Current: {job.status}).")
     else:
-        logger.info("❌ Job %s not ready yet: Missing requirements (BestImage: %s, Paid: %s)", job.id, has_best, is_paid)
+        logger.info(f"Job {job.id} not ready yet. Has best image: {job.best_image is not None}, Has paid: {job.has_paid()}")
