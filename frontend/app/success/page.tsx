@@ -1,180 +1,109 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import { CheckCircle2, Sparkles, ArrowRight, Mail, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getJobStatus } from "@/lib/api/generation";
+import { CheckCircle2, Mail, ArrowRight, ShieldCheck, Zap, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import confetti from "canvas-confetti";
 
 export default function SuccessPage() {
-  const [paymentStatus, setPaymentStatus] = useState<string>("PENDING");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [jobId, setJobId] = useState<string | null>(null);
-  const [retryTrigger, setRetryTrigger] = useState<number>(0);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const id = params.get("job_id");
-      setJobId(id);
-      if (!id) {
-        setIsLoading(false);
-        setError("No job ID found in the URL.");
+    setMounted(true);
+    // Trigger celebratory confetti on load
+    const duration = 3 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+    const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+    const interval: any = setInterval(function () {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
       }
-    }
+
+      const particleCount = 50 * (timeLeft / duration);
+      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+    }, 250);
+
+    return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (!jobId) return;
-
-    let isMounted = true;
-    let timeoutId: NodeJS.Timeout;
-    let currentInterval = 2000;
-    let elapsed = 0;
-    const MAX_POLL_TIME = 120000; // 2 minutes
-
-    const pollJobStatus = async () => {
-      try {
-        const job = await getJobStatus(parseInt(jobId));
-        if (!isMounted) return;
-
-        if (job.payment_status === "PAID") {
-          setPaymentStatus("PAID");
-          setIsLoading(false);
-        } else {
-          elapsed += currentInterval;
-          if (elapsed >= MAX_POLL_TIME) {
-            setIsLoading(false);
-            setError("Verification is taking longer than expected. Don't worry, we are processing your order!");
-            return;
-          }
-
-          // Exponential backoff: increase interval by 1.5x up to 10s
-          currentInterval = Math.min(currentInterval * 1.5, 10000);
-          timeoutId = setTimeout(pollJobStatus, currentInterval);
-        }
-      } catch (err: any) {
-        if (!isMounted) return;
-        console.error("Error polling job status:", err);
-        
-        elapsed += currentInterval;
-        if (elapsed >= MAX_POLL_TIME) {
-          setIsLoading(false);
-          setError("Unable to verify payment status. Please check your email for confirmation.");
-          return;
-        }
-
-        // Retry with longer delay
-        currentInterval = Math.min(currentInterval * 2, 10000);
-        timeoutId = setTimeout(pollJobStatus, currentInterval);
-      }
-    };
-
-    setIsLoading(true);
-    setError(null);
-    pollJobStatus();
-
-    return () => {
-      isMounted = false;
-      clearTimeout(timeoutId);
-    };
-  }, [jobId, retryTrigger]);
-
-  const handleRetry = () => {
-    setRetryTrigger(prev => prev + 1);
-  };
+  if (!mounted) return null;
 
   return (
-    <main className="relative min-h-screen flex items-center justify-center bg-background overflow-hidden py-12 px-4 sm:px-6 lg:px-8">
-      {/* Background gradients for aesthetic */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-accent/10 blur-3xl -z-10 animate-pulse" style={{ animationDuration: '4s' }} />
-      <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] rounded-full bg-primary/10 blur-2xl -z-10 animate-pulse" style={{ animationDuration: '6s' }} />
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-12 overflow-hidden relative">
+      {/* Aesthetic Background Orbs */}
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-accent/5 blur-[120px] -z-10 animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px] -z-10 animate-pulse" />
 
-      <div className="max-w-md w-full space-y-8 bg-card border border-border p-8 rounded-2xl shadow-lg text-center relative">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 text-accent animate-spin">
-              <Loader2 className="h-8 w-8" />
+      <div className="relative w-full max-w-2xl text-center bg-card border border-border p-8 md:p-12 rounded-3xl shadow-2xl">
+        {/* Animated Success Icon */}
+        <div className="mb-8 flex justify-center">
+          <div className="relative">
+            <div className="absolute inset-0 animate-ping rounded-full bg-green-500/20" />
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-green-500 shadow-[0_0_40px_rgba(34,197,94,0.4)]">
+              <CheckCircle2 className="h-12 w-12 text-white" />
             </div>
-            <h3 className="mb-2 text-2xl font-semibold text-foreground">Verifying Payment...</h3>
-            <p className="text-muted-foreground">We are confirming your payment with Stripe. Please do not close this page.</p>
           </div>
-        ) : error ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/20 text-destructive">
-              <AlertCircle className="h-8 w-8" />
-            </div>
-            <h3 className="mb-2 text-2xl font-semibold text-foreground">Notice</h3>
-            <p className="text-muted-foreground mb-6">{error}</p>
-            
-            {jobId && (
-              <Button 
-                onClick={handleRetry}
-                className="w-full bg-accent text-accent-foreground hover:bg-accent/90 mb-4 font-medium transition-all hover:glow-primary"
-              >
-                Check Status Again
-              </Button>
-            )}
+        </div>
 
-            <Link href="/" passHref className="w-full block">
-              <Button variant="outline" className="w-full border-border text-foreground hover:bg-muted h-11">
-                Return Home
-              </Button>
-            </Link>
+        {/* Content */}
+        <h1 className="mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+          Order <span className="text-accent">Confirmed!</span>
+        </h1>
+        <p className="mb-10 text-lg text-muted-foreground max-w-md mx-auto">
+          Thank you for your purchase. Our AI systems are now training on your photos to generate your professional headshots.
+        </p>
+
+        {/* What Happens Next Section */}
+        <div className="mb-12 grid gap-6 sm:grid-cols-2 text-left">
+          <div className="flex flex-col gap-3 rounded-2xl border border-border bg-muted/30 p-6">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10 text-accent">
+              <Zap className="h-5 w-5" />
+            </div>
+            <h3 className="font-semibold text-foreground">AI Training</h3>
+            <p className="text-sm text-muted-foreground">
+              We're processing your photos to create a high-fidelity custom model of your face.
+            </p>
           </div>
-        ) : (
-          <>
-            {/* Success Icon */}
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-500/10 text-green-500 glow-primary border border-green-500/20">
-              <CheckCircle2 className="h-10 w-10" />
-            </div>
 
-            {/* Text Content */}
-            <div className="mt-6">
-              <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-                Payment <span className="text-gradient">Confirmed!</span>
-              </h1>
-              <p className="mt-4 text-muted-foreground text-pretty">
-                Thank you for your purchase. We have received your photos and our AI systems are already getting to work.
-              </p>
+          <div className="flex flex-col gap-3 rounded-2xl border border-border bg-muted/30 p-6">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/10 text-blue-500">
+              <Mail className="h-5 w-5" />
             </div>
+            <h3 className="font-semibold text-foreground">Email Delivery</h3>
+            <p className="text-sm text-muted-foreground">
+              You will receive a download link at your email address within 10-20 minutes.
+            </p>
+          </div>
+        </div>
 
-            {/* What's Next Section */}
-            <div className="mt-8 border border-border/50 bg-muted/30 rounded-xl p-4 text-left space-y-3">
-              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-accent" /> What happens next?
-              </h3>
-              <ul className="text-sm text-muted-foreground space-y-2">
-                <li className="flex items-start gap-2">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent text-xs font-medium mt-0.5">1</span>
-                  <span>We process your photos to train a custom AI model.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent text-xs font-medium mt-0.5">2</span>
-                  <span>Our AI generates highly realistic professional headshots.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent text-xs font-medium mt-0.5">3</span>
-                  <span className="flex items-center gap-1">
-                    You'll receive an email <Mail className="h-3.5 w-3.5 inline mx-0.5" /> when ready (usually takes 10-20 mins).
-                  </span>
-                </li>
-              </ul>
-            </div>
+        {/* Actions */}
+        <div className="flex flex-col items-center justify-center gap-6">
+          <Link href="/" className="w-full sm:w-auto">
+            <Button size="lg" className="h-12 w-full bg-accent px-10 font-medium text-accent-foreground hover:bg-accent/90 sm:w-auto rounded-xl">
+              Back to Home
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
 
-            {/* Action Button */}
-            <div className="mt-8">
-              <Link href="/" passHref>
-                <Button className="w-full bg-accent text-accent-foreground font-medium hover:bg-accent/90 hover:glow-primary transition-all h-11 text-base">
-                  Return Home
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
+          <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="h-4 w-4 text-green-500" />
+              <span>Secure Process</span>
             </div>
-          </>
-        )}
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="h-4 w-4 text-accent" />
+              <span>AI Optimized</span>
+            </div>
+          </div>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }

@@ -46,7 +46,7 @@ class Job(models.Model):
         ).exists()
 
     def is_ready(self):
-        return self.has_input_images() and self.has_paid()  # ✅ no more images_uploaded
+        return self.best_image is not None and self.has_paid()
 
     def __str__(self):
         return f"Job {self.id} - {self.status}"

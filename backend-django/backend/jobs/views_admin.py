@@ -41,13 +41,13 @@ class AdminJobListView(APIView):
             data.append({
                 "id": job.id,
                 "email": job.email,
-                "payment_status": "PAID" if job.has_paid() else "PENDING",
-                "status": job.status,
-                "created_at": job.created_at,
-                "input_images": input_images,
-                "selected_image": selected_image,
-                "output_image": output_images[0] if output_images else None,
-                "error_message": job.error_message,
+                "payment": "paid" if job.has_paid() else "unpaid",
+                "status": job.status.lower(),
+                "created": job.created_at.strftime("%Y-%m-%d %H:%M"),
+                "inputImages": input_images,
+                "selectedImage": selected_image,
+                "outputImage": output_images[0] if output_images else None,
+                "error": job.error_message,
             })
         return Response(data)
 
@@ -86,13 +86,13 @@ class AdminJobDetailView(APIView):
         return Response({
             "id": job.id,
             "email": job.email,
-            "payment_status": "PAID" if job.has_paid() else "PENDING",
-            "status": job.status,
-            "created_at": job.created_at,
-            "input_images": input_images,
-            "selected_image": selected_image,
-            "output_image": output_images[0] if output_images else None,
-            "error_message": job.error_message,
+            "payment": "paid" if job.has_paid() else "unpaid",
+            "status": job.status.lower(),
+            "created": job.created_at.strftime("%Y-%m-%d %H:%M"),
+            "inputImages": input_images,
+            "selectedImage": selected_image,
+            "outputImage": output_images[0] if output_images else None,
+            "error": job.error_message,
         })
 
 
@@ -119,9 +119,9 @@ class AdminJobRetryView(APIView):
         return Response({
             "id": job.id,
             "email": job.email,
-            "payment_status": "PAID" if job.has_paid() else "PENDING",
-            "status": job.status,
-            "created_at": job.created_at,
+            "payment": "paid" if job.has_paid() else "unpaid",
+            "status": job.status.lower(),
+            "created": job.created_at.strftime("%Y-%m-%d %H:%M"),
         })
 
 
