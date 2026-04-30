@@ -6,5 +6,5 @@ urlpatterns = [
     path('remove-all/', DeleteAllJobsView.as_view()),
     path('<int:job_id>/upload/', UploadImageView.as_view()),
     path('<int:job_id>/', JobStatusView.as_view()),
-    path('track-view/', TrackView.as_view()),
+    path('record-view/', TrackView.as_view()),
 ]

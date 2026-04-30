@@ -8,7 +8,9 @@ from .models import Job
 from images.models import Image
 
 from services.validator_instance import get_validator
+
 from jobs.tasks import process_job
+from jobs.orchestrator import try_mark_job_ready
 
 
 from rest_framework.permissions import IsAuthenticated
@@ -43,9 +45,11 @@ class UploadImageView(APIView):
         except Job.DoesNotExist:
             return Response({"error": "Job not found"}, status=404)
 
-        # feat: v8.0.0 - Stripe Payment Status check.
-        # if job.payment_status != Job.PaymentStatus.PAID:
-        #     return Response({"error": "Payment not completed"}, status=400)
+
+        # Allow upload if job is in PENDING (CREATED) state
+        if job.status not in [Job.Status.PENDING]:
+            return Response({"error": "Images already uploaded or job not in correct state for upload."}, status=400)
+
 
         # Uploading image
         files = request.FILES.getlist('images')
@@ -56,56 +60,30 @@ class UploadImageView(APIView):
         if len(files) > 5:
             return Response({"error": "Max 5 images allowed"}, status=400)
 
-        # feat: v8.0.0 - Image Scoring System
-        valid_images = []
-        rejected_images = []
-
+        # feat: v15.1.0 - File size validation (max 10MB per image)
+        max_size = 10 * 1024 * 1024  # 10MB
         for f in files:
-            img = Image.objects.create(
+            if f.size > max_size:
+                return Response({"error": f"File '{f.name}' exceeds 10MB size limit."}, status=400)
+
+
+        # Save images only, validation/scoring will be async
+        for f in files:
+            Image.objects.create(
                 job=job,
                 file=f,
                 type=Image.Type.INPUT
             )
 
-            # feat: v8.1.1 - Validation using MediaPipe
-            valid, msg, face_info = get_validator().validate(img.file.path)
 
-            if not valid:
-                rejected_images.append({
-                    "file": f.name,
-                    "reason": msg
-                })
-                img.delete()
-                continue
+        # Trigger async validation/scoring
+        from jobs.tasks import validate_and_score_images
+        validate_and_score_images.delay(job.id)
 
-            # feat: v8.0.0 - Scoring Images (after validation)
-            score = score_image(img.file.path, face_info)
-
-            img.score = score
-            img.save()
-
-            valid_images.append(img)
-
-        # feat: v8.1.2 - If no valid images, fail early
-        if not valid_images:
-            job.status = Job.Status.FAILED
-            job.error_message = "All images failed validation"
-            job.save()
-
-            return Response({
-                "error": "All images invalid",
-                "details": rejected_images
-            }, status=400)
-
-        # feat: v8.0.0 - Selecting the best image based on the score
-        valid_images.sort(key=lambda x: x.score, reverse=True)
-
-        best_image = valid_images[0]
-
-        job.best_image = best_image  # feat: v8.0.0 - Assigning best image to job
-        
-        # Save job details. Processing will be triggered via Stripe Webhook after payment.
-        job.save()
+        return Response({
+            "status": "uploaded, validation started",
+            "uploaded_count": len(files)
+        })
 
 
         return Response({
@@ -129,6 +107,7 @@ class JobStatusView(APIView):
         return Response({
             "id": job.id,
             "status": job.status,
+            "payment_status": "PAID" if job.has_paid() else "PENDING",
             "input_images": [
                 img.file.url for img in input_images if img.file
             ],
@@ -142,8 +121,17 @@ class JobStatusView(APIView):
 
 class TrackView(APIView):
     def post(self, request):
-        from .models import Analytics
+        from analytics.models import Analytics
+        from django.db.models import F
+        
+        # Issue here, If multiple requests happened at the same time, they could read the same value, increment, and overwrite each other—causing lost updates.
+        # views_obj.value += 1
+        # views_obj.save()
+        
+        
+        # We replaced the increment with Django’s atomic F() expression:
+        #tells Django to increment the value directly in the database, so even if multiple requests happen at once, each increment is applied safely and no updates are lost.
         views_obj, _ = Analytics.objects.get_or_create(key="website_views")
-        views_obj.value += 1
-        views_obj.save()
+        Analytics.objects.filter(pk=views_obj.pk).update(value=F('value') + 1)
+        views_obj.refresh_from_db()
         return Response({"status": "tracked", "views": views_obj.value})

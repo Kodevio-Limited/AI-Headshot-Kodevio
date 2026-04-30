@@ -1,0 +1,753 @@
+﻿backend-1  | WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+backend-1  | I0000 00:00:1777455388.903348       7 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+backend-1  | I0000 00:00:1777455388.943978       7 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+backend-1  | To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+backend-1  | WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+backend-1  | I0000 00:00:1777455389.963243       7 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+backend-1  | generated new fontManager
+backend-1  | Operations to perform:
+backend-1  |   Apply all migrations: admin, auth, contenttypes, images, jobs, sessions
+backend-1  | Running migrations:
+backend-1  |   No migrations to apply.
+backend-1  |   Your models in app(s): 'jobs', 'payments' have changes that are not yet reflected in a migration, and so won't be applied.
+backend-1  |   Run 'manage.py makemigrations' to make new migrations, and then re-run 'manage.py migrate' to apply them.
+backend-1  | [2026-04-29 09:36:35 +0000] [56] [INFO] Starting gunicorn 25.3.0
+backend-1  | [2026-04-29 09:36:35 +0000] [56] [INFO] Listening at: http://0.0.0.0:8000 (56)
+backend-1  | [2026-04-29 09:36:35 +0000] [56] [INFO] Using worker: sync
+backend-1  | [2026-04-29 09:36:35 +0000] [57] [INFO] Booting worker with pid: 57
+backend-1  | [2026-04-29 09:36:35 +0000] [56] [INFO] Control socket listening at /root/.gunicorn/gunicorn.ctl
+backend-1  | WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+backend-1  | I0000 00:00:1777455403.941416      57 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+backend-1  | I0000 00:00:1777455403.986707      57 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+backend-1  | To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+backend-1  | WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+backend-1  | I0000 00:00:1777455405.142143      57 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+backend-1  | RAW webhook payload: {
+backend-1  |   "id": "evt_1TRUXwQUkz1DZ9TKCITBRIAh",
+backend-1  |   "object": "event",
+backend-1  |   "api_version": "2026-04-22.dahlia",
+backend-1  |   "created": 1777455404,
+backend-1  |   "data": {
+backend-1  |     "object": {
+backend-1  |       "id": "prod_UQLEvcxYy3CWWd",
+backend-1  |       "object": "product",
+backend-1  |       "active": true,
+backend-1  |       "attributes": [],
+backend-1  |       "created": 1777455404,
+backend-1  |       "default_price": null,
+backend-1  |       "description": "(created by Stripe CLI)",
+backend-1  |       "images": [],
+backend-1  |       "livemode": false,
+backend-1  |       "marketing_features": [],
+backend-1  |       "metadata": {},
+backend-1  |       "name": "myproduct",
+backend-1  |       "package_dimensions": null,
+backend-1  |       "shippable": null,
+backend-1  |       "statement_descriptor": null,
+backend-1  |       "tax_code": null,
+backend-1  |       "tax_details": null,
+backend-1  |       "type": "service",
+backend-1  |       "unit_label": null,
+backend-1  |       "updated": 1777455404,
+backend-1  |       "url": null
+backend-1  |     }
+backend-1  |   },
+backend-1  |   "livemode": false,
+backend-1  |   "pending_webhooks": 2,
+backend-1  |   "request": {
+backend-1  |     "id": "req_GSil2XHjAm2Vyv",
+backend-1  |     "idempotency_key": "747d8128-f4af-43d6-bf39-6c48a2f83bd4"
+backend-1  |   },
+backend-1  |   "type": "product.created"
+backend-1  | }
+backend-1  | Webhook received. Signature header present: True
+backend-1  | Webhook signature verified. Event type: product.created
+backend-1  | Unhandled event type: product.created - ignoring.
+backend-1  | RAW webhook payload: {
+backend-1  |   "id": "evt_1TRUXwQUkz1DZ9TKTV9v7qaL",
+backend-1  |   "object": "event",
+backend-1  |   "api_version": "2026-04-22.dahlia",
+backend-1  |   "created": 1777455404,
+backend-1  |   "data": {
+backend-1  |     "object": {
+backend-1  |       "id": "price_1TRUXwQUkz1DZ9TKp1WWTUDD",
+backend-1  |       "object": "price",
+backend-1  |       "active": true,
+backend-1  |       "billing_scheme": "per_unit",
+backend-1  |       "created": 1777455404,
+backend-1  |       "currency": "usd",
+backend-1  |       "custom_unit_amount": null,
+backend-1  |       "livemode": false,
+backend-1  |       "lookup_key": null,
+backend-1  |       "metadata": {},
+backend-1  |       "nickname": null,
+backend-1  |       "product": "prod_UQLEvcxYy3CWWd",
+backend-1  |       "recurring": null,
+backend-1  |       "tax_behavior": "unspecified",
+backend-1  |       "tiers_mode": null,
+backend-1  |       "transform_quantity": null,
+backend-1  |       "type": "one_time",
+backend-1  |       "unit_amount": 1500,
+backend-1  |       "unit_amount_decimal": "1500"
+backend-1  |     }
+backend-1  |   },
+backend-1  |   "livemode": false,
+backend-1  |   "pending_webhooks": 2,
+backend-1  |   "request": {
+backend-1  |     "id": "req_uj6wdYVuxoMj2B",
+backend-1  |     "idempotency_key": "4cfdb9b2-7eed-49ef-a386-279b03689f5f"
+backend-1  |   },
+backend-1  |   "type": "price.created"
+backend-1  | }
+backend-1  | Webhook received. Signature header present: True
+backend-1  | Webhook signature verified. Event type: price.created
+backend-1  | Unhandled event type: price.created - ignoring.
+backend-1  | RAW webhook payload: {
+backend-1  |   "id": "evt_3TRUXzQUkz1DZ9TK4yt8AG8k",
+backend-1  |   "object": "event",
+backend-1  |   "api_version": "2026-04-22.dahlia",
+backend-1  |   "created": 1777455407,
+backend-1  |   "data": {
+backend-1  |     "object": {
+backend-1  |       "id": "ch_3TRUXzQUkz1DZ9TK43n17tpE",
+backend-1  |       "object": "charge",
+backend-1  |       "amount": 3000,
+backend-1  |       "amount_captured": 3000,
+backend-1  |       "amount_refunded": 0,
+backend-1  |       "application": null,
+backend-1  |       "application_fee": null,
+backend-1  |       "application_fee_amount": null,
+backend-1  |       "balance_transaction": null,
+backend-1  |       "billing_details": {
+backend-1  |         "address": {
+backend-1  |           "city": "South San Francisco",
+backend-1  |           "country": "US",
+backend-1  |           "line1": "354 Oyster Point Blvd",
+backend-1  |           "line2": null,
+backend-1  |           "postal_code": "94080",
+backend-1  |           "state": "CA"
+backend-1  |         },
+backend-1  |         "email": "stripe@example.com",
+backend-1  |         "name": "Jenny Rosen",
+backend-1  |         "phone": null,
+backend-1  |         "tax_id": null
+backend-1  |       },
+backend-1  |       "calculated_statement_descriptor": "Stripe",
+backend-1  |       "captured": true,
+backend-1  |       "created": 1777455407,
+backend-1  |       "currency": "usd",
+backend-1  |       "customer": null,
+backend-1  |       "description": null,
+backend-1  |       "destination": null,
+backend-1  |       "dispute": null,
+backend-1  |       "disputed": false,
+backend-1  |       "failure_balance_transaction": null,
+backend-1  |       "failure_code": null,
+backend-1  |       "failure_message": null,
+backend-1  |       "fraud_details": {},
+backend-1  |       "livemode": false,
+backend-1  |       "metadata": {},
+backend-1  |       "on_behalf_of": null,
+backend-1  |       "order": null,
+backend-1  |       "outcome": {
+backend-1  |         "advice_code": null,
+backend-1  |         "network_advice_code": null,
+backend-1  |         "network_decline_code": null,
+backend-1  |         "network_status": "approved_by_network",
+backend-1  |         "reason": null,
+backend-1  |         "risk_level": "normal",
+backend-1  |         "risk_score": 23,
+backend-1  |         "seller_message": "Payment complete.",
+backend-1  |         "type": "authorized"
+backend-1  |       },
+backend-1  |       "paid": true,
+backend-1  |       "payment_intent": "pi_3TRUXzQUkz1DZ9TK4mQfqiMh",
+backend-1  |       "payment_method": "pm_1TRUXyQUkz1DZ9TKPo6MUXfp",
+backend-1  |       "payment_method_details": {
+backend-1  |         "card": {
+backend-1  |           "amount_authorized": 3000,
+backend-1  |           "authorization_code": "266332",
+backend-1  |           "brand": "visa",
+backend-1  |           "checks": {
+backend-1  |             "address_line1_check": "pass",
+backend-1  |             "address_postal_code_check": "pass",
+backend-1  |             "cvc_check": "pass"
+backend-1  |           },
+backend-1  |           "country": "US",
+backend-1  |           "ds_transaction_id": null,
+backend-1  |           "exp_month": 4,
+backend-1  |           "exp_year": 2027,
+backend-1  |           "extended_authorization": {
+backend-1  |             "status": "disabled"
+backend-1  |           },
+backend-1  |           "fingerprint": "Cjm7DHNDGVs4XY1N",
+backend-1  |           "funding": "credit",
+backend-1  |           "incremental_authorization": {
+backend-1  |             "status": "unavailable"
+backend-1  |           },
+backend-1  |           "installments": null,
+backend-1  |           "last4": "4242",
+backend-1  |           "mandate": null,
+backend-1  |           "multicapture": {
+backend-1  |             "status": "unavailable"
+backend-1  |           },
+backend-1  |           "network": "visa",
+backend-1  |           "network_token": {
+backend-1  |             "used": false
+backend-1  |           },
+backend-1  |           "network_transaction_id": "671061095568727",
+backend-1  |           "overcapture": {
+backend-1  |             "maximum_amount_capturable": 3000,
+backend-1  |             "status": "unavailable"
+backend-1  |           },
+backend-1  |           "regulated_status": "unregulated",
+backend-1  |           "three_d_secure": null,
+backend-1  |           "wallet": null
+backend-1  |         },
+backend-1  |         "type": "card"
+backend-1  |       },
+backend-1  |       "radar_options": {},
+backend-1  |       "receipt_email": null,
+backend-1  |       "receipt_number": null,
+backend-1  |       "receipt_url": "https://pay.stripe.com/receipts/payment/CAcaFwoVYWNjdF8xVFFublpRVWt6MURaOVRLKLCix88GMgaSeCRa-X86LBYDOf0lvpXje5bPKWQa000pqduouhhcXn7UmGKaf9668LLTANJwRfk5D9wF",
+backend-1  |       "refunded": false,
+backend-1  |       "review": null,
+backend-1  |       "shipping": {
+backend-1  |         "address": {
+backend-1  |           "city": "San Francisco",
+backend-1  |           "country": "US",
+backend-1  |           "line1": "510 Townsend St",
+backend-1  |           "line2": null,
+backend-1  |           "postal_code": "94103",
+backend-1  |           "state": "CA"
+backend-1  |         },
+backend-1  |         "carrier": null,
+backend-1  |         "name": "Jenny Rosen",
+backend-1  |         "phone": null,
+backend-1  |         "tracking_number": null
+backend-1  |       },
+backend-1  |       "source": null,
+backend-1  |       "source_transfer": null,
+backend-1  |       "statement_descriptor": null,
+backend-1  |       "statement_descriptor_suffix": null,
+backend-1  |       "status": "succeeded",
+backend-1  |       "transfer_data": null,
+backend-1  |       "transfer_group": null
+backend-1  |     }
+backend-1  |   },
+backend-1  |   "livemode": false,
+backend-1  |   "pending_webhooks": 2,
+backend-1  |   "request": {
+backend-1  |     "id": null,
+backend-1  |     "idempotency_key": "7a97d3bc-2af1-4575-9235-1f7db06a9daf"
+backend-1  |   },
+backend-1  |   "type": "charge.succeeded"
+backend-1  | }
+backend-1  | Webhook received. Signature header present: True
+backend-1  | Webhook signature verified. Event type: charge.succeeded
+backend-1  | Unhandled event type: charge.succeeded - ignoring.
+backend-1  | RAW webhook payload: {
+backend-1  |   "id": "evt_1TRUY0QUkz1DZ9TKd0ifgFwr",
+backend-1  |   "object": "event",
+backend-1  |   "api_version": "2026-04-22.dahlia",
+backend-1  |   "created": 1777455408,
+backend-1  |   "data": {
+backend-1  |     "object": {
+backend-1  |       "id": "cs_test_a1iGjmam321GgIxu7KF2ac0ZLtlrkDqlmgnDBkqnFiVGQQzmJcHNs77vAl",
+backend-1  |       "object": "checkout.session",
+backend-1  |       "adaptive_pricing": {
+backend-1  |         "enabled": true
+backend-1  |       },
+backend-1  |       "after_expiration": null,
+backend-1  |       "allow_promotion_codes": null,
+backend-1  |       "amount_subtotal": 3000,
+backend-1  |       "amount_total": 3000,
+backend-1  |       "automatic_tax": {
+backend-1  |         "enabled": false,
+backend-1  |         "liability": null,
+backend-1  |         "provider": null,
+backend-1  |         "status": null
+backend-1  |       },
+backend-1  |       "billing_address_collection": null,
+backend-1  |       "branding_settings": {
+backend-1  |         "background_color": "#ffffff",
+backend-1  |         "border_style": "rounded",
+backend-1  |         "button_color": "#0074d4",
+backend-1  |         "display_name": "Kodevio Limited",
+backend-1  |         "font_family": "default",
+backend-1  |         "icon": null,
+backend-1  |         "logo": null
+backend-1  |       },
+backend-1  |       "cancel_url": "https://httpbin.org/post",
+backend-1  |       "client_reference_id": null,
+backend-1  |       "client_secret": null,
+backend-1  |       "collected_information": null,
+backend-1  |       "consent": null,
+backend-1  |       "consent_collection": null,
+backend-1  |       "created": 1777455405,
+backend-1  |       "currency": "usd",
+backend-1  |       "currency_conversion": null,
+backend-1  |       "custom_fields": [],
+backend-1  |       "custom_text": {
+backend-1  |         "after_submit": null,
+backend-1  |         "shipping_address": null,
+backend-1  |         "submit": null,
+backend-1  |         "terms_of_service_acceptance": null
+backend-1  |       },
+backend-1  |       "customer": null,
+backend-1  |       "customer_account": null,
+backend-1  |       "customer_creation": "if_required",
+backend-1  |       "customer_details": {
+backend-1  |         "address": {
+backend-1  |           "city": "South San Francisco",
+backend-1  |           "country": "US",
+backend-1  |           "line1": "354 Oyster Point Blvd",
+backend-1  |           "line2": null,
+backend-1  |           "postal_code": "94080",
+backend-1  |           "state": "CA"
+backend-1  |         },
+backend-1  |         "business_name": null,
+backend-1  |         "email": "stripe@example.com",
+backend-1  |         "individual_name": null,
+backend-1  |         "name": "Jenny Rosen",
+backend-1  |         "phone": null,
+backend-1  |         "tax_exempt": "none",
+backend-1  |         "tax_ids": []
+backend-1  |       },
+backend-1  |       "customer_email": null,
+backend-1  |       "discounts": [],
+backend-1  |       "expires_at": 1777541805,
+backend-1  |       "integration_identifier": null,
+backend-1  |       "invoice": null,
+backend-1  |       "invoice_creation": {
+backend-1  |         "enabled": false,
+backend-1  |         "invoice_data": {
+backend-1  |           "account_tax_ids": null,
+backend-1  |           "custom_fields": null,
+backend-1  |           "description": null,
+backend-1  |           "footer": null,
+backend-1  |           "issuer": null,
+backend-1  |           "metadata": {},
+backend-1  |           "rendering_options": null
+backend-1  |         }
+backend-1  |       },
+backend-1  |       "livemode": false,
+backend-1  |       "locale": null,
+backend-1  |       "managed_payments": {
+backend-1  |         "enabled": false
+backend-1  |       },
+backend-1  |       "metadata": {
+backend-1  |         "job_id": "59"
+backend-1  |       },
+backend-1  |       "mode": "payment",
+backend-1  |       "origin_context": null,
+backend-1  |       "payment_intent": "pi_3TRUXzQUkz1DZ9TK4mQfqiMh",
+backend-1  |       "payment_link": null,
+backend-1  |       "payment_method_collection": "if_required",
+backend-1  |       "payment_method_configuration_details": {
+backend-1  |         "id": "pmc_1TQno6QUkz1DZ9TKqs6vpiFO",
+backend-1  |         "parent": null
+backend-1  |       },
+backend-1  |       "payment_method_options": {
+backend-1  |         "card": {
+backend-1  |           "request_three_d_secure": "automatic"
+backend-1  |         }
+backend-1  |       },
+backend-1  |       "payment_method_types": [
+backend-1  |         "card",
+backend-1  |         "link"
+backend-1  |       ],
+backend-1  |       "payment_status": "paid",
+backend-1  |       "permissions": null,
+backend-1  |       "phone_number_collection": {
+backend-1  |         "enabled": false
+backend-1  |       },
+backend-1  |       "recovered_from": null,
+backend-1  |       "saved_payment_method_options": null,
+backend-1  |       "setup_intent": null,
+backend-1  |       "shipping_address_collection": null,
+backend-1  |       "shipping_cost": null,
+backend-1  |       "shipping_options": [],
+backend-1  |       "status": "complete",
+backend-1  |       "submit_type": null,
+backend-1  |       "subscription": null,
+backend-1  |       "success_url": "https://httpbin.org/post",
+backend-1  |       "total_details": {
+backend-1  |         "amount_discount": 0,
+backend-1  |         "amount_shipping": 0,
+backend-1  |         "amount_tax": 0
+backend-1  |       },
+backend-1  |       "ui_mode": "hosted_page",
+backend-1  |       "url": null,
+backend-1  |       "wallet_options": null
+backend-1  |     }
+backend-1  |   },
+backend-1  |   "livemode": false,
+backend-1  |   "pending_webhooks": 2,
+backend-1  |   "request": {
+backend-1  |     "id": null,
+backend-1  |     "idempotency_key": null
+backend-1  |   },
+backend-1  |   "type": "checkout.session.completed"
+backend-1  | }
+backend-1  | Webhook received. Signature header present: True
+backend-1  | Webhook signature verified. Event type: checkout.session.completed
+backend-1  | UNCAUGHT WEBHOOK EXCEPTION: get
+backend-1  | Traceback (most recent call last):
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/stripe/_stripe_object.py", line 171, in __getattr__
+backend-1  |     return self[k]
+backend-1  |            ~~~~^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/stripe/_stripe_object.py", line 224, in __getitem__
+backend-1  |     raise err
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/stripe/_stripe_object.py", line 203, in __getitem__
+backend-1  |     return self._data[k]
+backend-1  |            ~~~~~~~~~~^^^
+backend-1  | KeyError: 'get'
+backend-1  | 
+backend-1  | The above exception was the direct cause of the following exception:
+backend-1  | 
+backend-1  | Traceback (most recent call last):
+backend-1  |   File "/app/payments/webhook.py", line 55, in stripe_webhook
+backend-1  |     metadata = session.get("metadata") or {}
+backend-1  |                ^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/stripe/_stripe_object.py", line 173, in __getattr__
+backend-1  |     raise AttributeError(*err.args) from err
+backend-1  | AttributeError: get
+backend-1  | RAW webhook payload: {
+backend-1  |   "id": "evt_3TRUXzQUkz1DZ9TK4ecQiHhX",
+backend-1  |   "object": "event",
+backend-1  |   "api_version": "2026-04-22.dahlia",
+backend-1  |   "created": 1777455407,
+backend-1  |   "data": {
+backend-1  |     "object": {
+backend-1  |       "id": "pi_3TRUXzQUkz1DZ9TK4mQfqiMh",
+backend-1  |       "object": "payment_intent",
+backend-1  |       "amount": 3000,
+backend-1  |       "amount_capturable": 0,
+backend-1  |       "amount_details": {
+backend-1  |         "tip": {}
+backend-1  |       },
+backend-1  |       "amount_received": 0,
+backend-1  |       "application": null,
+backend-1  |       "application_fee_amount": null,
+backend-1  |       "automatic_payment_methods": null,
+backend-1  |       "canceled_at": null,
+backend-1  |       "cancellation_reason": null,
+backend-1  |       "capture_method": "automatic_async",
+backend-1  |       "client_secret": "pi_3TRUXzQUkz1DZ9TK4mQfqiMh_secret_g40DyRISU4ivz0CRW1C3UEgSH",
+backend-1  |       "confirmation_method": "automatic",
+backend-1  |       "created": 1777455407,
+backend-1  |       "currency": "usd",
+backend-1  |       "customer": null,
+backend-1  |       "customer_account": null,
+backend-1  |       "description": null,
+backend-1  |       "excluded_payment_method_types": null,
+backend-1  |       "last_payment_error": null,
+backend-1  |       "latest_charge": null,
+backend-1  |       "livemode": false,
+backend-1  |       "managed_payments": {
+backend-1  |         "enabled": false
+backend-1  |       },
+backend-1  |       "metadata": {},
+backend-1  |       "next_action": null,
+backend-1  |       "on_behalf_of": null,
+backend-1  |       "payment_method": null,
+backend-1  |       "payment_method_configuration_details": null,
+backend-1  |       "payment_method_options": {
+backend-1  |         "card": {
+backend-1  |           "installments": null,
+backend-1  |           "mandate_options": null,
+backend-1  |           "network": null,
+backend-1  |           "request_three_d_secure": "automatic"
+backend-1  |         }
+backend-1  |       },
+backend-1  |       "payment_method_types": [
+backend-1  |         "card"
+backend-1  |       ],
+backend-1  |       "processing": null,
+backend-1  |       "receipt_email": null,
+backend-1  |       "review": null,
+backend-1  |       "setup_future_usage": null,
+backend-1  |       "shared_payment_granted_token": null,
+backend-1  |       "shipping": {
+backend-1  |         "address": {
+backend-1  |           "city": "San Francisco",
+backend-1  |           "country": "US",
+backend-1  |           "line1": "510 Townsend St",
+backend-1  |           "line2": null,
+backend-1  |           "postal_code": "94103",
+backend-1  |           "state": "CA"
+backend-1  |         },
+backend-1  |         "carrier": null,
+backend-1  |         "name": "Jenny Rosen",
+backend-1  |         "phone": null,
+backend-1  |         "tracking_number": null
+backend-1  |       },
+backend-1  |       "source": null,
+backend-1  |       "statement_descriptor": null,
+backend-1  |       "statement_descriptor_suffix": null,
+backend-1  |       "status": "requires_payment_method",
+backend-1  |       "transfer_data": null,
+backend-1  |       "transfer_group": null
+backend-1  |     }
+backend-1  |   },
+backend-1  |   "livemode": false,
+backend-1  |   "pending_webhooks": 2,
+backend-1  |   "request": {
+backend-1  |     "id": null,
+backend-1  |     "idempotency_key": "7a97d3bc-2af1-4575-9235-1f7db06a9daf"
+backend-1  |   },
+backend-1  |   "type": "payment_intent.created"
+backend-1  | }
+backend-1  | Webhook received. Signature header present: True
+backend-1  | Webhook signature verified. Event type: payment_intent.created
+backend-1  | Unhandled event type: payment_intent.created - ignoring.
+backend-1  | RAW webhook payload: {
+backend-1  |   "id": "evt_3TRUXzQUkz1DZ9TK47mnUF8w",
+backend-1  |   "object": "event",
+backend-1  |   "api_version": "2026-04-22.dahlia",
+backend-1  |   "created": 1777455407,
+backend-1  |   "data": {
+backend-1  |     "object": {
+backend-1  |       "id": "pi_3TRUXzQUkz1DZ9TK4mQfqiMh",
+backend-1  |       "object": "payment_intent",
+backend-1  |       "amount": 3000,
+backend-1  |       "amount_capturable": 0,
+backend-1  |       "amount_details": {
+backend-1  |         "shipping": {
+backend-1  |           "amount": 0,
+backend-1  |           "from_postal_code": null,
+backend-1  |           "to_postal_code": null
+backend-1  |         },
+backend-1  |         "tax": {
+backend-1  |           "total_tax_amount": 0
+backend-1  |         },
+backend-1  |         "tip": {}
+backend-1  |       },
+backend-1  |       "amount_received": 3000,
+backend-1  |       "application": null,
+backend-1  |       "application_fee_amount": null,
+backend-1  |       "automatic_payment_methods": null,
+backend-1  |       "canceled_at": null,
+backend-1  |       "cancellation_reason": null,
+backend-1  |       "capture_method": "automatic_async",
+backend-1  |       "client_secret": "pi_3TRUXzQUkz1DZ9TK4mQfqiMh_secret_g40DyRISU4ivz0CRW1C3UEgSH",
+backend-1  |       "confirmation_method": "automatic",
+backend-1  |       "created": 1777455407,
+backend-1  |       "currency": "usd",
+backend-1  |       "customer": null,
+backend-1  |       "customer_account": null,
+backend-1  |       "description": null,
+backend-1  |       "excluded_payment_method_types": null,
+backend-1  |       "last_payment_error": null,
+backend-1  |       "latest_charge": "ch_3TRUXzQUkz1DZ9TK43n17tpE",
+backend-1  |       "livemode": false,
+backend-1  |       "managed_payments": {
+backend-1  |         "enabled": false
+backend-1  |       },
+backend-1  |       "metadata": {},
+backend-1  |       "next_action": null,
+backend-1  |       "on_behalf_of": null,
+backend-1  |       "payment_details": {
+backend-1  |         "customer_reference": null,
+backend-1  |         "order_reference": "cs_test_a1iGjmam321GgIxu7KF2ac0ZLtlrkDqlmgnDBkqnFiVGQQzmJcHNs77vAl"
+backend-1  |       },
+backend-1  |       "payment_method": "pm_1TRUXyQUkz1DZ9TKPo6MUXfp",
+backend-1  |       "payment_method_configuration_details": null,
+backend-1  |       "payment_method_options": {
+backend-1  |         "card": {
+backend-1  |           "installments": null,
+backend-1  |           "mandate_options": null,
+backend-1  |           "network": null,
+backend-1  |           "request_three_d_secure": "automatic"
+backend-1  |         }
+backend-1  |       },
+backend-1  |       "payment_method_types": [
+backend-1  |         "card"
+backend-1  |       ],
+backend-1  |       "processing": null,
+backend-1  |       "receipt_email": null,
+backend-1  |       "review": null,
+backend-1  |       "setup_future_usage": null,
+backend-1  |       "shared_payment_granted_token": null,
+backend-1  |       "shipping": {
+backend-1  |         "address": {
+backend-1  |           "city": "San Francisco",
+backend-1  |           "country": "US",
+backend-1  |           "line1": "510 Townsend St",
+backend-1  |           "line2": null,
+backend-1  |           "postal_code": "94103",
+backend-1  |           "state": "CA"
+backend-1  |         },
+backend-1  |         "carrier": null,
+backend-1  |         "name": "Jenny Rosen",
+backend-1  |         "phone": null,
+backend-1  |         "tracking_number": null
+backend-1  |       },
+backend-1  |       "source": null,
+backend-1  |       "statement_descriptor": null,
+backend-1  |       "statement_descriptor_suffix": null,
+backend-1  |       "status": "succeeded",
+backend-1  |       "transfer_data": null,
+backend-1  |       "transfer_group": null
+backend-1  |     }
+backend-1  |   },
+backend-1  |   "livemode": false,
+backend-1  |   "pending_webhooks": 2,
+backend-1  |   "request": {
+backend-1  |     "id": null,
+backend-1  |     "idempotency_key": "7a97d3bc-2af1-4575-9235-1f7db06a9daf"
+backend-1  |   },
+backend-1  |   "type": "payment_intent.succeeded"
+backend-1  | }
+backend-1  | Webhook received. Signature header present: True
+backend-1  | Webhook signature verified. Event type: payment_intent.succeeded
+backend-1  | Unhandled event type: payment_intent.succeeded - ignoring.
+backend-1  | RAW webhook payload: {
+backend-1  |   "id": "evt_3TRUXzQUkz1DZ9TK4Utujlfz",
+backend-1  |   "object": "event",
+backend-1  |   "api_version": "2026-04-22.dahlia",
+backend-1  |   "created": 1777455410,
+backend-1  |   "data": {
+backend-1  |     "object": {
+backend-1  |       "id": "ch_3TRUXzQUkz1DZ9TK43n17tpE",
+backend-1  |       "object": "charge",
+backend-1  |       "amount": 3000,
+backend-1  |       "amount_captured": 3000,
+backend-1  |       "amount_refunded": 0,
+backend-1  |       "application": null,
+backend-1  |       "application_fee": null,
+backend-1  |       "application_fee_amount": null,
+backend-1  |       "balance_transaction": "txn_3TRUXzQUkz1DZ9TK4PJTvlPj",
+backend-1  |       "billing_details": {
+backend-1  |         "address": {
+backend-1  |           "city": "South San Francisco",
+backend-1  |           "country": "US",
+backend-1  |           "line1": "354 Oyster Point Blvd",
+backend-1  |           "line2": null,
+backend-1  |           "postal_code": "94080",
+backend-1  |           "state": "CA"
+backend-1  |         },
+backend-1  |         "email": "stripe@example.com",
+backend-1  |         "name": "Jenny Rosen",
+backend-1  |         "phone": null,
+backend-1  |         "tax_id": null
+backend-1  |       },
+backend-1  |       "calculated_statement_descriptor": "Stripe",
+backend-1  |       "captured": true,
+backend-1  |       "created": 1777455407,
+backend-1  |       "currency": "usd",
+backend-1  |       "customer": null,
+backend-1  |       "description": null,
+backend-1  |       "destination": null,
+backend-1  |       "dispute": null,
+backend-1  |       "disputed": false,
+backend-1  |       "failure_balance_transaction": null,
+backend-1  |       "failure_code": null,
+backend-1  |       "failure_message": null,
+backend-1  |       "fraud_details": {},
+backend-1  |       "livemode": false,
+backend-1  |       "metadata": {},
+backend-1  |       "on_behalf_of": null,
+backend-1  |       "order": null,
+backend-1  |       "outcome": {
+backend-1  |         "advice_code": null,
+backend-1  |         "network_advice_code": null,
+backend-1  |         "network_decline_code": null,
+backend-1  |         "network_status": "approved_by_network",
+backend-1  |         "reason": null,
+backend-1  |         "risk_level": "normal",
+backend-1  |         "risk_score": 23,
+backend-1  |         "seller_message": "Payment complete.",
+backend-1  |         "type": "authorized"
+backend-1  |       },
+backend-1  |       "paid": true,
+backend-1  |       "payment_intent": "pi_3TRUXzQUkz1DZ9TK4mQfqiMh",
+backend-1  |       "payment_method": "pm_1TRUXyQUkz1DZ9TKPo6MUXfp",
+backend-1  |       "payment_method_details": {
+backend-1  |         "card": {
+backend-1  |           "amount_authorized": 3000,
+backend-1  |           "authorization_code": "266332",
+backend-1  |           "brand": "visa",
+backend-1  |           "checks": {
+backend-1  |             "address_line1_check": "pass",
+backend-1  |             "address_postal_code_check": "pass",
+backend-1  |             "cvc_check": "pass"
+backend-1  |           },
+backend-1  |           "country": "US",
+backend-1  |           "ds_transaction_id": null,
+backend-1  |           "exp_month": 4,
+backend-1  |           "exp_year": 2027,
+backend-1  |           "extended_authorization": {
+backend-1  |             "status": "disabled"
+backend-1  |           },
+backend-1  |           "fingerprint": "Cjm7DHNDGVs4XY1N",
+backend-1  |           "funding": "credit",
+backend-1  |           "incremental_authorization": {
+backend-1  |             "status": "unavailable"
+backend-1  |           },
+backend-1  |           "installments": null,
+backend-1  |           "last4": "4242",
+backend-1  |           "mandate": null,
+backend-1  |           "multicapture": {
+backend-1  |             "status": "unavailable"
+backend-1  |           },
+backend-1  |           "network": "visa",
+backend-1  |           "network_token": {
+backend-1  |             "used": false
+backend-1  |           },
+backend-1  |           "network_transaction_id": "671061095568727",
+backend-1  |           "overcapture": {
+backend-1  |             "maximum_amount_capturable": 3000,
+backend-1  |             "status": "unavailable"
+backend-1  |           },
+backend-1  |           "regulated_status": "unregulated",
+backend-1  |           "three_d_secure": null,
+backend-1  |           "wallet": null
+backend-1  |         },
+backend-1  |         "type": "card"
+backend-1  |       },
+backend-1  |       "radar_options": {},
+backend-1  |       "receipt_email": null,
+backend-1  |       "receipt_number": null,
+backend-1  |       "receipt_url": "https://pay.stripe.com/receipts/payment/CAcaFwoVYWNjdF8xVFFublpRVWt6MURaOVRLKLKix88GMgZnGOhZ0v86LBa4CVhS78qYC3LVa5_2adV4_D9rElmHxqbGXICyfIwGlwwbjy0MHSgbC799",
+backend-1  |       "refunded": false,
+backend-1  |       "review": null,
+backend-1  |       "shipping": {
+backend-1  |         "address": {
+backend-1  |           "city": "San Francisco",
+backend-1  |           "country": "US",
+backend-1  |           "line1": "510 Townsend St",
+backend-1  |           "line2": null,
+backend-1  |           "postal_code": "94103",
+backend-1  |           "state": "CA"
+backend-1  |         },
+backend-1  |         "carrier": null,
+backend-1  |         "name": "Jenny Rosen",
+backend-1  |         "phone": null,
+backend-1  |         "tracking_number": null
+backend-1  |       },
+backend-1  |       "source": null,
+backend-1  |       "source_transfer": null,
+backend-1  |       "statement_descriptor": null,
+backend-1  |       "statement_descriptor_suffix": null,
+backend-1  |       "status": "succeeded",
+backend-1  |       "transfer_data": null,
+backend-1  |       "transfer_group": null
+backend-1  |     },
+backend-1  |     "previous_attributes": {
+backend-1  |       "balance_transaction": null,
+backend-1  |       "receipt_url": "https://pay.stripe.com/receipts/payment/CAcaFwoVYWNjdF8xVFFublpRVWt6MURaOVRLKLKix88GMgZFy_OEFA86LBaIMUGu2WoJEQuI7UQgYKkbWOScO_hQr4K2b7XO6RRYF1ZcmIDqfUAlTvCz"
+backend-1  |     }
+backend-1  |   },
+backend-1  |   "livemode": false,
+backend-1  |   "pending_webhooks": 2,
+backend-1  |   "request": {
+backend-1  |     "id": null,
+backend-1  |     "idempotency_key": null
+backend-1  |   },
+backend-1  |   "type": "charge.updated"
+backend-1  | }
+backend-1  | Webhook received. Signature header present: True
+backend-1  | Webhook signature verified. Event type: charge.updated
+backend-1  | Unhandled event type: charge.updated - ignoring.

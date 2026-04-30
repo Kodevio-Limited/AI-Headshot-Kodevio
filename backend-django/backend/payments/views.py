@@ -31,12 +31,21 @@ class CreateCheckoutSessionView(APIView):
                 },
                 "quantity": 1,
             }],
-            success_url=f"{settings.FRONTEND_BASE_URL}/?payment=success",
+            success_url=f"{settings.FRONTEND_BASE_URL}/success?job_id={job.id}",
             cancel_url=f"{settings.FRONTEND_BASE_URL}/",
             metadata={
                 "job_id": str(job.id),
                 "email": job.email
             }
+        )
+
+        from payments.models import Payment
+        Payment.objects.create(
+            job=job,
+            provider="stripe",
+            provider_payment_id=session.id,
+            amount=500,
+            status=Payment.Status.PENDING
         )
 
         return Response({"checkout_url": session.url})

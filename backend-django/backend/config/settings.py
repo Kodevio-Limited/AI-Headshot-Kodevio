@@ -21,16 +21,18 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ──────────────────────────────────────────────────────────────────────────
-# CORS / CSRF / Cookie settings (session auth with Next.js on :3000)
+# CORS / CSRF / Cookie settings (session auth with Next.js on :3000) _______
 # ──────────────────────────────────────────────────────────────────────────
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 
 # CSRF must trust the Next.js origin so cross-origin POSTs work
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 
 # Lax is fine for same-site localhost; switch to None + Secure in production
@@ -119,6 +121,7 @@ INSTALLED_APPS = [
     'jobs.apps.JobsConfig',
     'images.apps.ImagesConfig',
     'payments.apps.PaymentsConfig',
+    'analytics.apps.AnalyticsConfig',
 ]
 
 MIDDLEWARE = [
