@@ -11,8 +11,7 @@ def try_mark_job_ready(job):
     Job Readiness Trigger — called after both image upload and payment webhook.
     Commented out the has_paid() check as requested to unblock verification.
     """
-    # if job.has_input_images() and job.has_paid():
-    if job.has_input_images():
+    if job.has_input_images() and job.has_paid():
         if job.status == Job.Status.PENDING:
             job.status   = Job.Status.READY
             job.ready_at = timezone.now()

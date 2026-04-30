@@ -107,7 +107,7 @@ class JobStatusView(APIView):
         return Response({
             "id": job.id,
             "status": job.status,
-            "payment_status": "PAID", # feat: v16.0.0 - Hardcoded for non-blocking Stripe testing
+            "payment_status": "PAID" if job.has_paid() else "PENDING",
             "input_images": [
                 img.file.url for img in input_images if img.file
             ],

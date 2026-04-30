@@ -67,14 +67,12 @@ export default function Hero() {
 
       // 2. Upload Images
       await uploadImages(job_id, images);
-      //   // 3. Create Checkout Session
-      // const { checkout_url } = await createCheckoutSession(job_id);
 
-      // // 4. Redirect to Stripe Checkout (page navigates away — no code runs after this)
-      // window.location.href = checkout_url;
+      // 3. Create Checkout Session
+      const { checkout_url } = await createCheckoutSession(job_id);
 
-      // 3. Skip Stripe Checkout and redirect directly to success
-      window.location.href = `/success?job_id=${job_id}`;
+      // 4. Redirect to Stripe Checkout (page navigates away — no code runs after this)
+      window.location.href = checkout_url;
 
     } catch (error: any) {
       setErrorMessage(error.message || "An error occurred while processing your request.");
