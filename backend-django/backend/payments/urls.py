@@ -6,3 +6,5 @@ urlpatterns = [
     path("checkout/<int:job_id>/", CreateCheckoutSessionView.as_view()),
     path("webhook/", stripe_webhook),
 ]
+
+

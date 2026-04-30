@@ -24,7 +24,9 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { createJob, uploadImages, createCheckoutSession } from "@/lib/api/generation";
+import { z } from "zod";
 
+const emailSchema = z.string().email("Please enter a valid email address.");
 
 
 export default function Hero() {
@@ -54,6 +56,13 @@ export default function Hero() {
 
   const submitJob = async () => {
     if (!email) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+    // feat: Email validation with zod updated.
+    const validationResult = emailSchema.safeParse(email);
+
+    if (!validationResult.success) {
       setErrorMessage("Please enter a valid email address.");
       return;
     }
